@@ -1,0 +1,6 @@
+node_modules/
+dist/
+apps/api/data/
+*.log
+.env
+test-results/
