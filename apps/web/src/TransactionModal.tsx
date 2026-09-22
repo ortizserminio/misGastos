@@ -5,7 +5,8 @@ import {type Asset,assetValue} from './assets';
 export default function TransactionModal({accounts,assets=[],onClose,onSave,initial}:{initial?:Transaction;accounts:string[];assets?:Asset[];onClose:()=>void;onSave:(t:Transaction)=>void}){
  const storedAssets=assets.length?assets: (()=>{try{const raw=localStorage.getItem('misgastos.local.v1');const parsed=raw?JSON.parse(raw):null;return Array.isArray(parsed?.assets)?parsed.assets as Asset[]:[];}catch{return [];}})();
  const available=storedAssets.filter(a=>['Cuenta','Efectivo','Ahorro'].includes(a.type));
- const choices=available.length?available:accounts.map((name,i)=>({id:`legacy-${i}`,name,color:'#5b21b6',bank:'',type:'Cuenta' as const,notes:'',valuations:[]}));
+ const legacy=accounts.filter(name=>!available.some(a=>a.name===name)).map((name,i)=>({id:`legacy-${i}`,name,color:'#5b21b6',bank:'',type:'Cuenta' as const,notes:'',valuations:[]}));
+ const choices=[...available,...legacy];
  const [step,setStep]=useState(initial?2:0),[type,setType]=useState<'expense'|'income'>(initial?.type??'expense'),[date,setDate]=useState(initial?.date??today()),[category,setCategory]=useState(initial?.category??''),[amount,setAmount]=useState(initial?String(initial.amountCents/100):''),[merchant,setMerchant]=useState(initial?.merchant??''),[bank,setBank]=useState(initial?.bank??choices[0]?.name??''),[error,setError]=useState('');const dialog=useRef<HTMLDialogElement>(null);const saved=useRef(false);
  useEffect(()=>{dialog.current?.showModal();},[]);
  const close=()=>{if((amount||merchant||category)&&!confirm('¿Descartar este movimiento sin guardar?'))return;onClose();};
