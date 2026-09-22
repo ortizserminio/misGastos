@@ -46,7 +46,10 @@ async function supabase(path, options = {}) {
     ...options,
     headers: { apikey: key, Authorization: `Bearer ${key}`, 'Content-Type': 'application/json', ...(options.headers ?? {}) },
   });
-  if (!response.ok) throw new ApiError(502, 'database_error', 'No se pudo guardar el gasto.');
+  if (!response.ok) {
+    const detail = (await response.text()).replace(/\s+/g, ' ').slice(0, 300);
+    throw new ApiError(502, 'database_error', `Supabase respondió HTTP ${response.status}: ${detail}`);
+  }
   return response.status === 204 ? null : response.json();
 }
 function input(body) {
