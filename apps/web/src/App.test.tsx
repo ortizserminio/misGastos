@@ -34,6 +34,7 @@ describe('personal finance workflow',()=>{
   render(<App cloud={cloud}/>);
   expect(await screen.findByText('Café del atajo')).toBeTruthy();
   expect(cloud.save).toHaveBeenCalledTimes(1);
+  expect(cloud.save.mock.calls[0][0].transactions[0].id).toBe('ev1');
   fireEvent.click(screen.getByRole('button',{name:'Ajustes'}));
   expect(screen.getByText('ana@ejemplo.com')).toBeTruthy();
   fireEvent.click(screen.getByRole('button',{name:/Atajo Apple Pay/}));
