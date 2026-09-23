@@ -17,7 +17,7 @@ export default function Settings({data,onChange,onShortcut,onPatrimonio,onCatego
    <p>Gestiona misGastos a tu manera</p></section>
   {error&&<p className="error" role="alert">{error}</p>}
   <section className="set-card"><Row icon={Banknote} label="Moneda" value="Euro (EUR)"/><Row icon={Landmark} label="Patrimonio y cuentas" onClick={onPatrimonio}/><Row icon={LayoutGrid} label="Categorías" value={`${data.categories.length} activas`} onClick={onCategories}/></section>
-  <section className="set-card"><h2>Atajos</h2><Row icon={Zap} accent label="Atajo Apple Pay" value="Importe · comercio · banco" onClick={onShortcut}/></section>
+  <section className="set-card"><h2>Atajos</h2><Row icon={Zap} accent label="Atajo Apple Pay" onClick={onShortcut}/></section>
   <section className="set-card"><h2>Automatizaciones <span className="set-badge">NUEVO</span></h2><Row icon={UploadCloud} accent label="Importar movimientos" value="CSV o PDF" onClick={onImport}/></section>
   <section className="set-card">
    {editing==='owner'?<form className="set-inline set-owner" onSubmit={commit}><label>Titular de las cuentas<input autoFocus value={draft} maxLength={200} onChange={e=>setDraft(e.target.value)} placeholder="Nombre y apellidos como en el banco"/></label><button className="icon-button" aria-label="Guardar titular"><Check size={18}/></button></form>:<Row icon={UserRound} label="Titular de las cuentas" value={profile.ownerName||'Sin indicar'} onClick={()=>start('owner')}/>}

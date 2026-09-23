@@ -1,5 +1,5 @@
 import Patrimonio from './Patrimonio';
-import {useState} from 'react';
+import {useEffect,useState} from 'react';
 import {Wallet,MessageCircle,Plus,ChartNoAxesColumnIncreasing,Settings as SettingsIcon,ArrowUpRight,ArrowDownLeft,ChevronRight,ChevronLeft,SlidersHorizontal,PieChart,ArrowLeft,Check,ShieldCheck,Sparkles} from 'lucide-react';
 import {type Data,type Transaction,emptyData,validateBackup,today,money,summary,demoData,mergeTransactions,parseMoney} from './domain';
 import TransactionModal from './TransactionModal';
@@ -19,9 +19,10 @@ export default function App(){
  function add(t:Transaction){save({...data,transactions:[t,...data.transactions.filter(v=>v.id!==t.id)]});setModal(false);setEditing(null);setNotice('Movimiento guardado.');}
  const stats=summary(data.transactions,month),sorted=[...stats.current].sort((a,b)=>b.date.localeCompare(a.date));
  const nav=(name:string)=>{setTab(name);setPage('');setNotice('');};
+ useEffect(()=>{if(!/jsdom/i.test(navigator.userAgent))window.scrollTo(0,0);},[tab,page]);
  const budgetCents=data.budgets[month]||0;
  const palette=Object.fromEntries(data.categories.map(c=>[c.name,c.color]));
- return <div className="app-shell">{tab==='Gastos'&&(page===''||page==='all')&&<header className="app-header"><button className="brand" onClick={()=>nav('Gastos')} aria-label="misGastos inicio"><span className="brand-symbol"><Wallet size={23}/></span><span>mis<span className="brand-accent">Gastos</span></span></button><div className="header-right"><span className="local-badge"><span/> Solo en tu dispositivo</span><button className="avatar" aria-label="Abrir perfil" onClick={()=>nav('Ajustes')}>{data.profile.avatar?<img src={data.profile.avatar} alt=""/>:(data.profile.displayName||'MG').split(/\s+/).map(w=>w[0]).join('').slice(0,2).toUpperCase()}</button></div></header>}<main id="main">{error&&<p className="error" role="alert">{error}</p>}{notice&&<div role="status" className="toast"><Check size={18}/>{notice}<button aria-label="Cerrar aviso" onClick={()=>setNotice('')}>×</button></div>}
+ return <div className="app-shell">{tab==='Gastos'&&(page===''||page==='all')&&<header className="app-header"><button className="brand" onClick={()=>nav('Gastos')} aria-label="misGastos inicio"><span className="brand-symbol"><Wallet size={23}/></span><span>mis<span className="brand-accent">Gastos</span></span></button><div className="header-right"><span className="local-badge"><span/> Solo en tu dispositivo</span><button className="avatar" aria-label="Abrir perfil" onClick={()=>nav('Ajustes')}>{data.profile.avatar?<img src={data.profile.avatar} alt=""/>:data.profile.displayName?data.profile.displayName.split(/\s+/).map(w=>w[0]).join('').slice(0,2).toUpperCase():'MG'}</button></div></header>}<main id="main">{error&&<p className="error" role="alert">{error}</p>}{notice&&<div role="status" className="toast"><Check size={18}/>{notice}<button aria-label="Cerrar aviso" onClick={()=>setNotice('')}>×</button></div>}
  {page==='shortcut'?<Shortcut onBack={()=>setPage('')} onSync={items=>save({...data,transactions:mergeTransactions(data.transactions,items),accounts:Array.from(new Set([...data.accounts,...items.map(t=>t.bank)]))})}/>:
  page==='patrimonio'?<Patrimonio assets={data.assets??[]} transactions={data.transactions} onBack={()=>setPage('')} onSave={assets=>save({...data,assets,accounts:Array.from(new Set([...data.accounts,...assets.filter(a=>['Cuenta','Efectivo','Ahorro'].includes(a.type)).map(a=>a.name)]))})}/>:
  page==='import'?<ImportFlow data={data} onSave={d=>save(d)} onBack={()=>setPage('')}/>:

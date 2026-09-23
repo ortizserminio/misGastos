@@ -43,3 +43,13 @@
 - Producción: `npm.cmd run build` — compilación Vite superada; service worker generado con precache de la PWA.
 - La vista de `http://127.0.0.1:5174/` sigue abierta para probar el flujo manual en el navegador.
 - El alcance pendiente no cambia: para usar el atajo desde un iPhone fuera del ordenador hace falta publicar el receptor HTTPS; la paridad completa con mi€sencial y la revisión independiente del frontend siguen fuera de esta iteración.
+
+## Ajustes e importación de extractos — 23-09-2026 (rama `importar-extractos`)
+
+- Diseño: `docs/superpowers/specs/2026-09-23-ajustes-importacion-design.md`. Plan: `docs/superpowers/plans/2026-09-23-ajustes-importacion.md`.
+- Datos v2 con migración automática desde v1: transferencias (`type:'transfer'`, `toAccount`), perfil (nombre, titular, foto) y categorías editables. Las cuentas con saldo inicial calculan su saldo con los movimientos; las transferencias no cuentan como gasto ni ingreso.
+- Ajustes rehecho con la estructura de las capturas de referencia (morado). Cabecera de marca solo en la pantalla de inicio. Nueva pantalla de categorías.
+- Importación en el navegador (sin envío a servidores): CSV Trade Republic, PDF BBVA «Últimos movimientos», PDF N26 «Extracto», CSV genérico con elección de columnas. Detección de transferencias propias por titular/IBAN/entidad, duplicados por identificador y emparejamiento de las dos mitades de una transferencia (±3 días).
+- `npx vitest run`: **34/34**. `npm run build`: correcto; pdfjs se carga aparte solo al importar.
+- Prueba local con los extractos reales de la usuaria (no copiados al repositorio): N26 48 movimientos, saldo final 0,20 € igual que el resumen del banco (salientes −1351,99, entrantes +1341,99); BBVA 22 movimientos con saldo inicial deducido; Trade Republic 203 movimientos. Importar TR tras N26 emparejó 6 transferencias sin alterar el saldo de N26; reimportar N26 marcó 48/48 como ya importados.
+- Pendiente: login real (fase C, Supabase); verificación en iPhone/Safari; otros formatos PDF de bancos.

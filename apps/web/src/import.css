@@ -1,4 +1,4 @@
-.import-pad{padding:6px 20px 20px}.import-pad h2{margin:18px 0 8px}.import-pad .file-button{display:inline-flex;justify-content:center;align-items:center;gap:8px;padding:14px 18px;border-radius:14px;width:100%;flex-direction:row;color:white}.import-pad .file-button input{display:none}
+.import-pad{padding:6px 20px 20px}.import-pad h2{margin:18px 0 8px}.import-pad .file-button{display:inline-flex;justify-content:center;align-items:center;gap:8px;padding:14px 18px;border-radius:14px;width:100%;flex-direction:row;color:white;background:var(--purple);border:0;font-size:15px}.import-pad .file-button input{display:none}
 .wide{width:100%;min-height:52px;border-radius:14px;font-weight:600}
 .import-two{display:grid;grid-template-columns:1fr 1fr;gap:12px}.import-two label{margin:8px 0}
 .import-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:16px 20px}.import-summary strong{display:block;font-size:18px}
@@ -10,3 +10,4 @@
 .import-chip{padding:2px 8px;border-radius:999px;background:#f3f2f7;font-weight:600}.import-chip.own,.import-chip.paired{background:#f2ecfd;color:var(--purple)}.import-chip.maybe{background:#fff4d6;color:#8a5a00}.import-chip.duplicate{background:#eee;color:#777}
 .import-go{position:sticky;bottom:96px}.import-done{text-align:center}.import-done .set-icon{margin:20px auto 0}
 @media(max-width:760px){.import-two{grid-template-columns:1fr}.import-summary strong{font-size:15px}}
+.import-done h2{justify-content:center}
