@@ -69,3 +69,8 @@ grant usage on schema public to authenticated;
 grant select, insert, update on public.user_data to authenticated;
 grant select, insert, delete on public.shortcut_tokens to authenticated;
 grant select on public.shortcut_events to authenticated;
+-- La API de Vercel usa la clave de servicio; en proyectos nuevos también hay que concedérselo.
+grant select on public.shortcut_tokens to service_role;
+grant select, insert on public.shortcut_events to service_role;
+grant select, insert, update on public.user_data to service_role;
+grant select, update on public.invite_codes to service_role;
