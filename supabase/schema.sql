@@ -63,3 +63,9 @@ create policy "shortcut_events select own" on public.shortcut_events for select 
 -- insert into public.invite_codes (code, uses_left) values ('AMIGOS-2026', 10);
 -- Asignar a tu usuario los gastos antiguos del atajo (tras registrarte):
 -- update public.shortcut_events set user_id = (select id from auth.users where email = 'tu@email.com') where user_id is null;
+
+-- Permisos de la API para usuarios con sesión (los proyectos nuevos no los conceden solos).
+grant usage on schema public to authenticated;
+grant select, insert, update on public.user_data to authenticated;
+grant select, insert, delete on public.shortcut_tokens to authenticated;
+grant select on public.shortcut_events to authenticated;

@@ -16,7 +16,7 @@ export function retireLegacy(){try{const raw=localStorage.getItem(LEGACY_KEY);if
 async function fromRemote(uid:string,row:{data:unknown;version:number},notice?:string):Promise<Start>{const cache={data:parse(row.data),version:row.version,pending:false};writeCache(uid,cache);return {kind:'ready',cache,...(notice?{notice}:{})};}
 export async function start(uid:string,remote:Remote,legacy:Data|null):Promise<Start>{
  const cache=readCache(uid);let row;
- try{row=await remote.load();}catch{if(cache)return {kind:'ready',cache,notice:OFFLINE,offline:true};throw Error('No se han podido cargar tus datos. Comprueba la conexión y vuelve a intentarlo.');}
+ try{row=await remote.load();}catch(e){if(cache)return {kind:'ready',cache,notice:OFFLINE,offline:true};const detail=(e as {message?:string})?.message;throw Error(`No se han podido cargar tus datos. Comprueba la conexión y vuelve a intentarlo.${detail?` Detalle: ${detail}`:''}`);}
  if(!row){if(legacy&&!cache)return {kind:'askUpload',local:legacy};const data=cache?.data??emptyData();const version=await remote.create(data);const next={data,version,pending:false};writeCache(uid,next);return {kind:'ready',cache:next};}
  if(cache?.pending){if(cache.version!==row.version)return fromRemote(uid,row,CONFLICT);const version=await remote.update(cache.data,row.version);if(version===null){const fresh=await remote.load();return fromRemote(uid,fresh??row,CONFLICT);}const next={data:cache.data,version,pending:false};writeCache(uid,next);return {kind:'ready',cache:next};}
  return fromRemote(uid,row);
