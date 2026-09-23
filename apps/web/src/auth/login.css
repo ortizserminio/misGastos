@@ -1,0 +1,13 @@
+.login-page{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 16px;background:radial-gradient(circle at top,#f2ecfd,#f7f8fb 60%)}
+.login-brand{display:flex;align-items:center;gap:12px;font-size:26px;font-weight:700;margin-bottom:24px}
+.login-card{width:100%;max-width:400px;background:white;border:1px solid var(--border);border-radius:24px;padding:28px 24px;box-shadow:0 20px 40px #7c3aed14}
+.login-card h1{font-size:26px;letter-spacing:-.8px;margin-bottom:8px}
+.login-card label{margin:14px 0}
+.login-card .wide{width:100%;min-height:52px;border-radius:14px;font-weight:600;margin-top:10px}
+.login-card .text-button{margin-top:12px;color:var(--purple);font-weight:600;padding:6px 0}
+.login-switch{margin:8px 0 0;font-size:14px;text-align:center}.login-switch .text-button{margin:0}
+.login-card>.text-button{display:block;margin:14px auto 0}
+.cloud-banner{position:sticky;top:0;z-index:30;margin:0 auto;max-width:1100px;padding:10px 16px;background:#fff4d6;color:#7a4f00;font-size:13px;display:flex;gap:10px;align-items:center;justify-content:space-between}
+.cloud-banner button{font-weight:700;color:inherit}
+.cloud-center{min-height:100vh;display:grid;place-items:center;padding:24px;text-align:center}
+.cloud-center .login-card{text-align:left}

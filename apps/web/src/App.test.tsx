@@ -1,8 +1,9 @@
 // @vitest-environment jsdom
 import React from 'react';
 import {beforeEach,describe,it,expect,vi} from 'vitest';
-import {render,screen,fireEvent,cleanup} from '@testing-library/react';
+import {render,screen,fireEvent,cleanup,within} from '@testing-library/react';
 import App from './App';
+import {emptyData,today} from './domain';
 
 beforeEach(()=>{cleanup();localStorage.clear();HTMLDialogElement.prototype.showModal=function(){this.setAttribute('open','');};vi.stubGlobal('confirm',()=>true);});
 describe('personal finance workflow',()=>{
@@ -27,12 +28,24 @@ describe('personal finance workflow',()=>{
   expect(screen.getByRole('heading',{name:'Desglose de gastos'})).toBeTruthy();
   expect(screen.getByText('Entradas del mes')).toBeTruthy();
  });
- it('opens shortcut settings with required variables and honest disconnected state',()=>{
-  render(<App/>);fireEvent.click(screen.getByRole('button',{name:'Ajustes'}));
+ it('generates a personal shortcut token and merges shortcut expenses once',async()=>{
+  const shortcutItem={id:'ev1',type:'expense' as const,amountCents:250,merchant:'Café del atajo',bank:'N26',category:'Otros',date:today(),source:'shortcut' as const,externalId:'ev1'};
+  const cloud={email:'ana@ejemplo.com',initial:emptyData(),save:vi.fn(),logout:vi.fn(),createToken:vi.fn(async()=>'token-personal-123456789012345'),hasToken:vi.fn(async()=>false),fetchShortcut:vi.fn(async()=>[shortcutItem])};
+  render(<App cloud={cloud}/>);
+  expect(await screen.findByText('Café del atajo')).toBeTruthy();
+  expect(cloud.save).toHaveBeenCalledTimes(1);
+  fireEvent.click(screen.getByRole('button',{name:'Ajustes'}));
+  expect(screen.getByText('ana@ejemplo.com')).toBeTruthy();
   fireEvent.click(screen.getByRole('button',{name:/Atajo Apple Pay/}));
-  expect(screen.getByText('Desconectado')).toBeTruthy();
-  expect(screen.getByLabelText('Banco explícito')).toBeTruthy();
+  expect(await screen.findByText('Sin configurar')).toBeTruthy();
   expect(screen.getByRole('button',{name:'Enviar prueba'}).hasAttribute('disabled')).toBe(true);
+  fireEvent.click(screen.getByRole('button',{name:/Generar mi token/}));
+  expect(await screen.findByDisplayValue('token-personal-123456789012345')).toBeTruthy();
+  fireEvent.click(screen.getByRole('button',{name:/Traer gastos del atajo/}));
+  expect(await screen.findByText('No hay gastos nuevos del atajo.')).toBeTruthy();
+  fireEvent.click(within(screen.getByRole('navigation')).getByRole('button',{name:'Ajustes'}));
+  fireEvent.click(screen.getByRole('button',{name:'Cerrar sesión'}));
+  expect(cloud.logout).toHaveBeenCalled();
  });
  it('shows the brand header only on the home screen and a redesigned settings page',()=>{
   render(<App/>);expect(screen.getByRole('button',{name:'misGastos inicio'})).toBeTruthy();

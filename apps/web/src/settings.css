@@ -20,3 +20,4 @@ button.set-row:hover{background:#faf8ff}
 .danger{color:#c62828}
 @media(max-width:760px){.settings{padding-top:12px}.set-label{font-size:16px}.set-value{font-size:13px;max-width:45%}}
 .avatar{overflow:hidden;padding:0}.avatar img{width:100%;height:100%;object-fit:cover}
+.set-logout{display:block;margin:10px auto 18px;padding:12px 24px;color:#c62828;font-size:18px;font-weight:700}
