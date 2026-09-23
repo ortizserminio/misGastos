@@ -6,3 +6,11 @@ it('preserves dated valuations and carries forward each asset at its recorded da
 it('supports zero and negative balances with exact cents',()=>{expect(parseAssetValue('0')).toBe(0);expect(parseAssetValue('-10,05')).toBe(-1005);expect(()=>parseAssetValue('1.000,01')).toThrow();});
 it('migrates old backups and preserves new assets',()=>{expect(validateBackup(JSON.stringify({version:1,transactions:[],accounts:['Efectivo'],budgets:{}})).assets).toEqual([]);const data={...emptyData(),assets:[asset]};expect(validateBackup(JSON.stringify(data))).toEqual(data);});
 it('rejects malformed and duplicate valuation data',()=>{expect(()=>validateAssets([{...asset,valuations:[{date:'2026-02-30',valueCents:2}]}])).toThrow();expect(()=>validateAssets([asset,asset])).toThrow();expect(()=>validateAssets([{...asset,color:'red'}])).toThrow();});
+import {accountBalance,assetSeries} from './assets';
+import type {Transaction} from './domain';
+const tr:Asset={id:'tr',type:'Cuenta',bank:'Trade Republic',name:'Trade Republic',color:'#252525',notes:'',valuations:[],openingBalance:{date:'2026-09-01',valueCents:100000}};
+const n26:Asset={...tr,id:'n26',bank:'N26',name:'N26',openingBalance:{date:'2026-09-01',valueCents:20000}};
+const move=(p:Partial<Transaction>):Transaction=>({id:crypto.randomUUID(),type:'expense',amountCents:100,merchant:'x',bank:'N26',category:'Otros',date:'2026-09-10',source:'import',...p});
+it('moves money between own accounts without counting spending',()=>{const list=[move({type:'transfer',amountCents:2000,bank:'Trade Republic',toAccount:'N26',category:'Transferencia'})];expect(accountBalance(tr,list)).toBe(98000);expect(accountBalance(n26,list)).toBe(22000);});
+it('applies expenses and incomes from the opening date onwards',()=>{const list=[move({amountCents:500}),move({type:'income',amountCents:300}),move({amountCents:999,date:'2026-08-31'})];expect(accountBalance(n26,list)).toBe(19800);expect(assetSeries(n26,list)).toEqual([{date:'2026-09-01',valueCents:20000},{date:'2026-09-10',valueCents:19800}]);});
+it('keeps iban and opening balance through validation',()=>{expect(validateAssets([{...tr,iban:'ES6115860001467451815811'}])[0]).toMatchObject({iban:'ES6115860001467451815811',openingBalance:{date:'2026-09-01',valueCents:100000}});expect(()=>validateAssets([{...tr,iban:'nope'}])).toThrow();});
