@@ -59,7 +59,7 @@ Todo en el navegador; los archivos no se envían a ningún servidor. PDF con `pd
 | Trade Republic CSV | cabecera con `transaction_id` y `counterparty_iban` | importe con signo en `amount`; `fee`/`tax` se suman al importe; nombre de `name` o `description`; id = `transaction_id` |
 | BBVA PDF | texto «Últimos movimientos» y columnas Fecha/Concepto/Importe/Saldo | fila principal + línea «Fecha valor … <detalle>»; importes `-1000,00` |
 | N26 PDF | texto «Extracto preliminar» / BIC `NTSBESM1XXX` | columnas separadas: importes y fechas de reserva a la derecha, bloques de descripción a la izquierda; emparejar por orden y coordenada vertical; importes `+130,00`; IBAN propio en pie de página |
-| CSV genérico | cualquier otro CSV | el usuario elige columna fecha, importe (o cargo/abono), concepto; separador `,` o `;`; decimales `,` o `.` |
+| CSV genérico | cualquier otro CSV | el usuario elige columna fecha, importe con signo y concepto; separador `,` `;` o tabulador; decimales `,` o `.` |
 
 Cada lector produce `ImportRow {date, amountCents (con signo), description, counterpartyName?, counterpartyIban?, kindHint?, mcc?, externalId}`. Si un PDF no se reconoce: mensaje claro, sin importar nada.
 
