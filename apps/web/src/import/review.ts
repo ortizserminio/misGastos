@@ -1,6 +1,7 @@
 import {type Data,type Transaction,TRANSFER} from '../domain';
 import {type ParsedStatement,type ImportRow} from './common';
 import {classify,EXTERNAL} from './classify';
+import {tidyMerchant} from '../merchants';
 export type Status='new'|'duplicate'|'own'|'maybe'|'paired';
 export type ReviewRow={row:ImportRow;include:boolean;status:Status;type:Transaction['type'];category:string;other:string;merchant:string};
 const prefix=(id?:string)=>id?.split(':')[0]??'';
@@ -10,7 +11,9 @@ export function buildReview(st:ParsedStatement,account:string,data:Data):ReviewR
  const known=new Set(data.transactions.flatMap(t=>[t.externalId,t.pairedExternalId].filter((v):v is string=>!!v))),used=new Set<string>();
  return st.rows.map(row=>{
   const s=classify(row,{account,owner:data.profile.ownerName,assets:data.assets??[],categories:data.categories.map(c=>c.name)});
-  const r:ReviewRow={row,include:true,status:'new',type:s.type,category:s.category||'Otros',other:s.other,merchant:row.description.slice(0,200)||'Movimiento importado'};
+  const known_=s.type==='transfer'?null:tidyMerchant(row.description),names=data.categories.map(c=>c.name);
+  const category=s.type==='expense'&&known_?.category&&names.includes(known_.category)?known_.category:s.category||'Otros';
+  const r:ReviewRow={row,include:true,status:'new',type:s.type,category,other:s.other,merchant:(known_?.name??row.description).slice(0,200)||'Movimiento importado'};
   if(known.has(row.externalId))return {...r,include:false,status:'duplicate'};
   if(s.type==='transfer'){const p=findPair(data.transactions,{...ends(r,account),amountCents:Math.abs(row.amountCents),date:row.date,externalId:row.externalId},used);if(p)used.add(p.id);return {...r,status:p?'paired':'own'};}
   return {...r,status:s.own==='maybe'?'maybe':'new'};

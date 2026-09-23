@@ -9,6 +9,7 @@ import Settings from './Settings';
 import Categories from './Categories';
 import ImportFlow from './ImportFlow';
 import {Donut,MovementList,MonthSelector} from './components';
+import {tidyData,tidyTransaction} from './merchants';
 
 const KEY='misgastos.local.v1';
 function read(){try{const raw=localStorage.getItem(KEY);return {data:raw?validateBackup(raw):emptyData(),error:''};}catch{return {data:emptyData(),error:'No se han podido leer tus datos. Se conserva la copia original; restaura una copia válida desde Ajustes antes de guardar cambios.'};}}
@@ -21,9 +22,9 @@ export default function App({cloud}:{cloud?:Cloud}={}){
  const stats=summary(data.transactions,month),sorted=[...stats.current].sort((a,b)=>b.date.localeCompare(a.date));
  const nav=(name:string)=>{setTab(name);setPage('');setNotice('');};
  const dataRef=useRef(data);dataRef.current=data;
- const addShortcutItems=(items:Transaction[])=>{const cur=dataRef.current,merged=mergeTransactions(cur.transactions,items,cur.dismissed);if(merged.length===cur.transactions.length)return 0;save({...cur,transactions:[...merged.slice(cur.transactions.length),...cur.transactions],accounts:Array.from(new Set([...cur.accounts,...items.map(t=>t.bank)]))});return merged.length-cur.transactions.length;};
+ const addShortcutItems=(items:Transaction[])=>{const cur=dataRef.current,merged=mergeTransactions(cur.transactions,items,cur.dismissed);if(merged.length===cur.transactions.length)return 0;const names=cur.categories.map(c=>c.name);save({...cur,transactions:[...merged.slice(cur.transactions.length).map(t=>tidyTransaction(t,names)),...cur.transactions],accounts:Array.from(new Set([...cur.accounts,...items.map(t=>t.bank)]))});return merged.length-cur.transactions.length;};
  // Expenses sent by the Apple Pay shortcut are stored per user in Supabase and merged here on start.
- useEffect(()=>{if(!cloud)return;let alive=true;cloud.fetchShortcut().then(items=>{if(alive)addShortcutItems(items);}).catch(()=>{});return()=>{alive=false;};},[]);
+ useEffect(()=>{const tidied=tidyData(dataRef.current);if(tidied)change(tidied);if(!cloud)return;let alive=true;cloud.fetchShortcut().then(items=>{if(alive)addShortcutItems(items);}).catch(()=>{});return()=>{alive=false;};},[]);
  useEffect(()=>{if(!/jsdom/i.test(navigator.userAgent))window.scrollTo(0,0);},[tab,page]);
  const budgetCents=data.budgets[month]||0;
  const palette=Object.fromEntries(data.categories.map(c=>[c.name,c.color]));
