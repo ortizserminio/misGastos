@@ -78,7 +78,7 @@ Cada lector produce `ImportRow {date, amountCents (con signo), description, coun
 ## Organización del código (apps/web/src)
 - `domain.ts`: tipos v2, migración, `summary` excluye transferencias.
 - `assets.ts`: `accountBalance`, historial calculado.
-- `import/csv.ts`, `import/pdfText.ts`, `import/traderepublic.ts`, `import/bbva.ts`, `import/n26.ts`, `import/genericCsv.ts`, `import/detect.ts`, `import/classify.ts`, `import/dedupe.ts`, `import/types.ts`.
+- `import/csv.ts`, `import/pdfText.ts`, `import/traderepublic.ts`, `import/bbva.ts`, `import/n26.ts`, `import/genericCsv.ts`, `import/detect.ts`, `import/classify.ts`, `import/review.ts` (duplicados y emparejamiento), `import/common.ts` (tipos y utilidades).
 - `ImportFlow.tsx`, `Categories.tsx`, `Settings.tsx` (rehecho).
 
 ## Pruebas
