@@ -1,0 +1,13 @@
+import {it,expect} from 'vitest';
+import {ownerMatch,classify,EXTERNAL} from './classify';
+import type {Asset} from '../assets';
+import type {ImportRow} from './common';
+const owner='Ana Prueba Ejemplo';
+const acc=(name:string,bank:string,iban?:string):Asset=>({id:name,type:'Cuenta',bank,name,color:'#111111',notes:'',valuations:[],openingBalance:{date:'2026-09-01',valueCents:0},...(iban?{iban}:{})});
+const assets=[acc('Trade Republic','Trade Republic'),acc('N26','N26','ES7215630000000000000002'),acc('BBVA','BBVA'),{...acc('Efectivo','Efectivo'),type:'Efectivo' as const}];
+const ctx={account:'Trade Republic',owner,assets,categories:['Alimentación','Transporte','Restauración','Otros']};
+const r=(p:Partial<ImportRow>):ImportRow=>({date:'2026-09-03',amountCents:-2000,description:'x',kind:'transfer',externalId:'tr:1',...p});
+it('matches the owner ignoring case, accents and spacing, but not similar names',()=>{expect(ownerMatch('ANA  PRUEBA EJÉMPLO',owner)).toBe('yes');expect(ownerMatch('Ana Prueba Ortiz',owner)).toBe('no');expect(ownerMatch('ANA P..',owner)).toBe('maybe');expect(ownerMatch('Otra P.E.',owner)).toBe('no');expect(ownerMatch('Ana Prueba',owner)).toBe('maybe');});
+it('turns own transfers into transfers and finds the other account',()=>{expect(classify(r({counterpartyName:owner,counterpartyIban:'ES7215630000000000000002'}),ctx)).toMatchObject({type:'transfer',other:'N26',own:'yes'});expect(classify(r({counterpartyName:owner,counterpartyIban:'ES6401820000000000000001',amountCents:5000}),ctx)).toMatchObject({type:'transfer',other:'BBVA'});expect(classify(r({counterpartyName:owner}),ctx).other).toBe(EXTERNAL);expect(classify(r({description:'Transferencia a Ana Prueba Ejemplo'}),ctx).type).toBe('transfer');});
+it('keeps strangers and card payments as spending with a guessed category',()=>{expect(classify(r({counterpartyName:'Ana Prueba Ortiz'}),ctx)).toMatchObject({type:'expense',own:'no'});expect(classify(r({kind:'card',description:'LIDL X',mcc:'5411'}),ctx).category).toBe('Alimentación');expect(classify(r({kind:'card',description:'PLENERGY 131'}),ctx).category).toBe('Transporte');expect(classify(r({kind:'card',description:'DISNEY PLUS',bankCategory:'Multimedia'}),ctx).category).toBe('Otros');expect(classify(r({kind:'interest',amountCents:8}),ctx)).toMatchObject({type:'income',category:'Intereses'});});
+it('treats trades and cash withdrawals as transfers',()=>{expect(classify(r({kind:'trade',instrument:'Fondo X',amountCents:-10000}),ctx)).toMatchObject({type:'transfer',other:'Fondo X'});expect(classify(r({kind:'cash',amountCents:-30000}),ctx)).toMatchObject({type:'transfer',other:'Efectivo'});});
