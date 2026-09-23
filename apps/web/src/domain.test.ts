@@ -13,3 +13,6 @@ describe('data v2',()=>{
  it('accepts transfers between different accounts and excludes them from totals',()=>{const t={...tx,id:'tr',type:'transfer' as const,bank:'TR',toAccount:'N26',category:'Transferencia',source:'import' as const,externalId:'tr:1'};const d={...emptyData(),transactions:[tx,t]};expect(validateBackup(JSON.stringify(d)).transactions).toHaveLength(2);expect(()=>validateBackup(JSON.stringify({...d,transactions:[{...t,toAccount:'TR'}]}))).toThrow();const s=summary([tx,t],'2026-09');expect(s.expense).toBe(1050);expect(s.income).toBe(0);});
  it('rejects duplicated category names',()=>{expect(()=>validateBackup(JSON.stringify({...emptyData(),categories:[{name:'Ocio',color:'#7c3aed'},{name:'ocio',color:'#7c3aed'}]}))).toThrow();});
 });
+describe('shortcut expenses deleted by the user',()=>{
+ it('are not brought back by a later sync and survive a backup round trip',()=>{const remote={...tx,id:'r1',source:'shortcut' as const,externalId:'ev-1'};expect(mergeTransactions([tx],[remote],['ev-1'])).toHaveLength(1);const d={...emptyData(),dismissed:['ev-1']};expect(validateBackup(JSON.stringify(d)).dismissed).toEqual(['ev-1']);expect(validateBackup(JSON.stringify(emptyData())).dismissed).toBeUndefined();});
+});
