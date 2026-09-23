@@ -5,7 +5,7 @@ const CASH=['Cuenta','Efectivo','Ahorro'];
 export const normalizeName=(s:string)=>s.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
 export function ownerMatch(name:string|undefined,owner:string):'yes'|'maybe'|'no'{
  if(!name||!owner.trim())return 'no';const a=normalizeName(name),b=normalizeName(owner);if(!a)return 'no';if(a===b)return 'yes';
- const at=a.split(' '),bt=b.split(' ');if(at.length<2||at.length>bt.length||at[0]!==bt[0])return 'no';
+ const at=a.split(' '),bt=b.split(' ');if(at.length<2||at.length>bt.length||at[0].length<3||!bt[0].startsWith(at[0]))return 'no';
  return at.every((t,i)=>bt[i].startsWith(t))&&(at.length<bt.length||at.some((t,i)=>t!==bt[i]))?'maybe':'no';
 }
 const ENTITIES:Record<string,string>={'0182':'BBVA','1563':'N26','1586':'Trade Republic','0049':'Santander','2100':'CaixaBank','1465':'ING','0081':'Sabadell','0128':'Bankinter','2085':'Ibercaja','0073':'Openbank'};
