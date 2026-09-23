@@ -13,3 +13,11 @@ it('keeps categories chosen by the user and is idempotent',()=>{
  expect(tidyTransaction(tx('MERCADONA X','Hogar'),cats)).toMatchObject({merchant:'Mercadona',category:'Hogar'});
  const once=tidyData({...emptyData(),transactions:[tx('LIDL ELCHE')]})!;expect(once.transactions[0].merchant).toBe('Lidl');expect(tidyData(once)).toBeNull();
 });
+it('applies the user rules before the built-in list and renames existing expenses',()=>{
+ const rules=[{match:'inturfood',name:'Cafetería campus',category:'Restauración'},{match:'mercadona',name:'Súper de siempre',category:'Hogar'}];
+ expect(tidyMerchant('INTURFOOD ALTABIX',rules)).toMatchObject({name:'Cafetería campus',category:'Restauración',custom:true});
+ expect(tidyMerchant('MERCADONA AGUAS NUEVAS',rules).name).toBe('Súper de siempre');
+ const d=tidyData({...emptyData(),merchantRules:rules,transactions:[tx('INTURFOOD ALTABIX'),tx('Mercadona','Alimentación')]})!;
+ expect(d.transactions.map(t=>[t.merchant,t.category])).toEqual([['Cafetería campus','Restauración'],['Súper de siempre','Hogar']]);
+ expect(tidyData(d)).toBeNull();
+});

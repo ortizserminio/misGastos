@@ -58,6 +58,21 @@ describe('personal finance workflow',()=>{
   fireEvent.click(screen.getByRole('button',{name:'Guardar titular'}));
   expect(screen.getByText('Ana Prueba Ejemplo')).toBeTruthy();
  });
+ it('lets the user create merchant rules from unrecognised expenses',()=>{
+  localStorage.setItem('misgastos.local.v1',JSON.stringify({...emptyData(),transactions:[{id:'a',type:'expense',amountCents:135,merchant:'INTURFOOD ALTABIX',bank:'N26',category:'Otros',date:today(),source:'import'}]}));
+  render(<App/>);fireEvent.click(screen.getByRole('button',{name:'Ajustes'}));
+  fireEvent.click(screen.getByRole('button',{name:/Nombres de comercios/}));
+  fireEvent.click(screen.getByRole('button',{name:/INTURFOOD ALTABIX/}));
+  expect((screen.getByLabelText('Si el comercio contiene') as HTMLInputElement).value).toBe('INTURFOOD ALTABIX');
+  fireEvent.change(screen.getByLabelText('Si el comercio contiene'),{target:{value:'inturfood'}});
+  fireEvent.change(screen.getByLabelText('Mostrar como'),{target:{value:'Cafetería campus'}});
+  fireEvent.change(screen.getByLabelText('Categoría de la regla'),{target:{value:'Restauración'}});
+  fireEvent.click(screen.getByRole('button',{name:/Guardar regla/}));
+  expect(screen.getByText(/1 gastos actualizados/)).toBeTruthy();
+  const saved=JSON.parse(localStorage.getItem('misgastos.local.v1')!);
+  expect(saved.transactions[0]).toMatchObject({merchant:'Cafetería campus',category:'Restauración'});
+  expect(saved.merchantRules).toEqual([{match:'inturfood',name:'Cafetería campus',category:'Restauración'}]);
+ });
  it('adds and removes categories moving movements to Otros',()=>{
   render(<App/>);fireEvent.click(screen.getByRole('button',{name:'Ajustes'}));
   fireEvent.click(screen.getByRole('button',{name:/Categorías/}));

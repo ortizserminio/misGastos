@@ -1,4 +1,4 @@
-import type {Data,Transaction} from './domain';
+import type {Data,MerchantRule,Transaction} from './domain';
 // Bank descriptors ("MNE* 95018521Moneynet_S", "DIA ORIHUELA 1488") mapped to readable names. Order matters: specific before generic.
 type Rule=[RegExp,string,string];
 const RULES:Rule[]=[
@@ -11,7 +11,12 @@ const RULES:Rule[]=[
  [/amazon|amzn/,'Amazon','Compras'],[/aliexpress/,'AliExpress','Compras'],[/shein/,'Shein','Compras'],[/\bzara\b/,'Zara','Compras'],[/primark/,'Primark','Compras'],[/decathlon/,'Decathlon','Compras'],[/north ?face/,'The North Face','Compras'],[/corte ingles/,'El Corte Inglés','Compras'],[/eurobazar/,'Eurobazar','Compras'],
  [/ikea/,'IKEA','Hogar'],[/leroy/,'Leroy Merlin','Hogar'],[/farmacia/,'Farmacia','Salud'],[/universidad miguel her|\bumh\b/,'Universidad Miguel Hernández','Otros'],
 ];
-export function tidyMerchant(raw:string):{name:string;category?:string}{const t=raw.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().trim();for(const [re,name,category] of RULES)if(re.test(t))return {name,category};return {name:raw};}
-// Renames recognised merchants; only fills the category when it is still "Otros", so the user's choices are kept.
-export function tidyTransaction(t:Transaction,categories:string[]):Transaction{if(t.type!=='expense')return t;const m=tidyMerchant(t.merchant);if(!m.category)return t;const category=t.category==='Otros'&&categories.includes(m.category)?m.category:t.category;return m.name===t.merchant&&category===t.category?t:{...t,merchant:m.name,category};}
-export function tidyData(data:Data):Data|null{const names=data.categories.map(c=>c.name);let changed=false;const transactions=data.transactions.map(t=>{const n=tidyTransaction(t,names);if(n!==t)changed=true;return n;});return changed?{...data,transactions}:null;}
+export const builtInMerchants=RULES.map(([re,name,category])=>({pattern:re.source,name,category}));
+export const normalizeText=(value:string)=>value.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/\s+/g,' ').trim();
+// The user's own rules ("contains" text) are checked before the built-in list.
+export function tidyMerchant(raw:string,custom:MerchantRule[]=[]):{name:string;category?:string;custom?:boolean}{const t=normalizeText(raw);for(const r of custom){const m=normalizeText(r.match);if(m&&t.includes(m))return {name:r.name,category:r.category,custom:true};}for(const [re,name,category] of RULES)if(re.test(t))return {name,category};return {name:raw};}
+// Renames recognised merchants. The category is filled when it is still "Otros", or when one of the user's rules renames the merchant for the first time.
+export function tidyTransaction(t:Transaction,categories:string[],custom:MerchantRule[]=[]):Transaction{if(t.type!=='expense')return t;const m=tidyMerchant(t.merchant,custom);if(!m.category)return t;const renamed=m.name!==t.merchant,valid=categories.includes(m.category);const category=valid&&(t.category==='Otros'||(m.custom&&renamed))?m.category:t.category;return !renamed&&category===t.category?t:{...t,merchant:m.name,category};}
+export function tidyData(data:Data):Data|null{const names=data.categories.map(c=>c.name),custom=data.merchantRules??[];let changed=false;const transactions=data.transactions.map(t=>{const n=tidyTransaction(t,names,custom);if(n!==t)changed=true;return n;});return changed?{...data,transactions}:null;}
+// Expense merchants that no rule recognises yet, most frequent first.
+export function unknownMerchants(data:Data,limit=8){const custom=data.merchantRules??[],count=new Map<string,number>();for(const t of data.transactions)if(t.type==='expense'&&!tidyMerchant(t.merchant,custom).category)count.set(t.merchant,(count.get(t.merchant)??0)+1);return [...count].sort((a,b)=>b[1]-a[1]).slice(0,limit).map(([merchant,times])=>({merchant,times}));}

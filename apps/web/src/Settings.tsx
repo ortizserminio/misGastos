@@ -1,11 +1,11 @@
 import {useRef,useState} from 'react';
-import {Camera,Pencil,Check,ChevronRight,Banknote,Landmark,LayoutGrid,Zap,UploadCloud,UserRound,Info,Download,Upload,Trash2,Mail,type LucideIcon} from 'lucide-react';
+import {Camera,Pencil,Check,ChevronRight,Banknote,Landmark,LayoutGrid,Zap,UploadCloud,UserRound,Info,Download,Upload,Trash2,Mail,Store,type LucideIcon} from 'lucide-react';
 import {type Data,validateBackup,download,emptyData} from './domain';
 import './settings.css';
-type Props={data:Data;onChange:(d:Data,restore?:boolean)=>void;onShortcut:()=>void;onPatrimonio:()=>void;onCategories:()=>void;onImport:()=>void;account?:{email:string;onLogout:()=>void}};
+type Props={data:Data;onChange:(d:Data,restore?:boolean)=>void;onShortcut:()=>void;onPatrimonio:()=>void;onCategories:()=>void;onMerchants:()=>void;onImport:()=>void;account?:{email:string;onLogout:()=>void}};
 function Row({icon:Icon,label,value,onClick,accent}:{icon:LucideIcon;label:string;value?:string;onClick?:()=>void;accent?:boolean}){const body=<><span className={`set-icon${accent?' accent':''}`}><Icon size={22}/></span><span className="set-label">{label}</span>{value&&<span className="set-value">{value}</span>}{onClick&&<ChevronRight className="set-chevron" size={20}/>}</>;return onClick?<button className="set-row" onClick={onClick}>{body}</button>:<div className="set-row">{body}</div>;}
 function resizeImage(file:File):Promise<string>{return new Promise((resolve,reject)=>{const img=new Image(),url=URL.createObjectURL(file);img.onload=()=>{const c=document.createElement('canvas'),s=Math.min(img.width,img.height);c.width=c.height=256;c.getContext('2d')!.drawImage(img,(img.width-s)/2,(img.height-s)/2,s,s,0,0,256,256);URL.revokeObjectURL(url);resolve(c.toDataURL('image/jpeg',.85));};img.onerror=()=>{URL.revokeObjectURL(url);reject(Error('No se ha podido leer la imagen.'));};img.src=url;});}
-export default function Settings({data,onChange,onShortcut,onPatrimonio,onCategories,onImport,account}:Props){
+export default function Settings({data,onChange,onShortcut,onPatrimonio,onCategories,onMerchants,onImport,account}:Props){
  const [editing,setEditing]=useState<''|'name'|'owner'>(''),[draft,setDraft]=useState(''),[error,setError]=useState(''),restore=useRef<HTMLInputElement>(null);
  const profile=data.profile,initials=(profile.displayName||'mis Gastos').split(/\s+/).map(w=>w[0]).join('').slice(0,2).toUpperCase();
  const saveProfile=(p:Partial<Data['profile']>)=>onChange({...data,profile:{...profile,...p}});
@@ -16,7 +16,7 @@ export default function Settings({data,onChange,onShortcut,onPatrimonio,onCatego
    {editing==='name'?<form className="set-inline" onSubmit={commit}><input autoFocus aria-label="Tu nombre" value={draft} maxLength={100} onChange={e=>setDraft(e.target.value)}/><button className="icon-button" aria-label="Guardar nombre"><Check size={18}/></button></form>:<h1 className="set-name">{profile.displayName||'Tu nombre'}<button className="icon-button compact" aria-label="Editar nombre" onClick={()=>start('name')}><Pencil size={16}/></button></h1>}
    <p>Gestiona misGastos a tu manera</p></section>
   {error&&<p className="error" role="alert">{error}</p>}
-  <section className="set-card"><Row icon={Banknote} label="Moneda" value="Euro (EUR)"/><Row icon={Landmark} label="Patrimonio y cuentas" onClick={onPatrimonio}/><Row icon={LayoutGrid} label="Categorías" value={`${data.categories.length} activas`} onClick={onCategories}/></section>
+  <section className="set-card"><Row icon={Banknote} label="Moneda" value="Euro (EUR)"/><Row icon={Landmark} label="Patrimonio y cuentas" onClick={onPatrimonio}/><Row icon={LayoutGrid} label="Categorías" value={`${data.categories.length} activas`} onClick={onCategories}/><Row icon={Store} label="Nombres de comercios" value={(data.merchantRules??[]).length?`${(data.merchantRules??[]).length} propias`:'Personalizar'} onClick={onMerchants}/></section>
   <section className="set-card"><h2>Atajos</h2><Row icon={Zap} accent label="Atajo Apple Pay" onClick={onShortcut}/></section>
   <section className="set-card"><h2>Automatizaciones <span className="set-badge">NUEVO</span></h2><Row icon={UploadCloud} accent label="Importar movimientos" value="CSV o PDF" onClick={onImport}/></section>
   <section className="set-card">
