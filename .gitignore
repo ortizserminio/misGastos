@@ -4,3 +4,4 @@ apps/api/data/
 *.log
 .env
 test-results/
+*.local
