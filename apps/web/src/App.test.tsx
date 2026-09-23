@@ -34,4 +34,23 @@ describe('personal finance workflow',()=>{
   expect(screen.getByLabelText('Banco explícito')).toBeTruthy();
   expect(screen.getByRole('button',{name:'Enviar prueba'}).hasAttribute('disabled')).toBe(true);
  });
+ it('shows the brand header only on the home screen and a redesigned settings page',()=>{
+  render(<App/>);expect(screen.getByRole('button',{name:'misGastos inicio'})).toBeTruthy();
+  fireEvent.click(screen.getByRole('button',{name:'Ajustes'}));
+  expect(screen.queryByRole('button',{name:'misGastos inicio'})).toBeNull();
+  expect(screen.getByRole('button',{name:/Importar movimientos/})).toBeTruthy();
+  fireEvent.click(screen.getByRole('button',{name:/Titular de las cuentas/}));
+  fireEvent.change(screen.getByLabelText('Titular de las cuentas'),{target:{value:'Ana Prueba Ejemplo'}});
+  fireEvent.click(screen.getByRole('button',{name:'Guardar titular'}));
+  expect(screen.getByText('Ana Prueba Ejemplo')).toBeTruthy();
+ });
+ it('adds and removes categories moving movements to Otros',()=>{
+  render(<App/>);fireEvent.click(screen.getByRole('button',{name:'Ajustes'}));
+  fireEvent.click(screen.getByRole('button',{name:/Categorías/}));
+  fireEvent.change(screen.getByLabelText('Nueva categoría'),{target:{value:'Mascotas'}});
+  fireEvent.click(screen.getByRole('button',{name:'Añadir categoría'}));
+  expect(screen.getByText('Mascotas')).toBeTruthy();
+  fireEvent.click(screen.getByRole('button',{name:'Borrar Mascotas'}));
+  expect(screen.queryByText('Mascotas')).toBeNull();
+ });
 });
