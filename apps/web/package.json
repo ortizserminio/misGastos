@@ -10,6 +10,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.117.1",
     "@vitejs/plugin-react": "latest",
     "lucide-react": "latest",
     "pdfjs-dist": "^4.10.38",

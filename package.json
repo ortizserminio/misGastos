@@ -9,6 +9,7 @@
     "web": "npm --prefix apps/web run dev",
     "test:api": "node --test apps/api/*.test.mjs",
     "test:web": "npm --prefix apps/web test",
+    "test:vercel": "node --test apps/web/api/_api.test.mjs apps/web/api/_shortcut.test.mjs",
     "build": "npm --prefix apps/web run build"
   }
 }

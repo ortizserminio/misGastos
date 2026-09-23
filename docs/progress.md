@@ -53,3 +53,12 @@
 - `npx vitest run`: **34/34**. `npm run build`: correcto; pdfjs se carga aparte solo al importar.
 - Prueba local con los extractos reales de la usuaria (no copiados al repositorio): N26 48 movimientos, saldo final 0,20 € igual que el resumen del banco (salientes −1351,99, entrantes +1341,99); BBVA 22 movimientos con saldo inicial deducido; Trade Republic 203 movimientos. Importar TR tras N26 emparejó 6 transferencias sin alterar el saldo de N26; reimportar N26 marcó 48/48 como ya importados.
 - Pendiente: login real (fase C, Supabase); verificación en iPhone/Safari; otros formatos PDF de bancos.
+
+## Login con Supabase (fase C) — 23-09-2026 (rama `login-supabase`)
+
+- Diseño `docs/superpowers/specs/2026-09-23-login-supabase-design.md`, plan `docs/superpowers/plans/2026-09-23-login-supabase.md`, puesta en marcha `docs/login-supabase.md`, esquema `supabase/schema.sql`.
+- Email + contraseña; registro solo con código de invitación (`/api/signup`); recuperación de contraseña. Datos por usuario en `user_data` con RLS y versión; copia local por usuario, avisos sin conexión y de conflicto; subida inicial de datos del modo local.
+- Atajo: token personal por usuario (hash SHA-256 en `shortcut_tokens`); `SHORTCUT_TOKEN` global retirado; la app fusiona sus eventos de `shortcut_events`.
+- Pruebas: Vitest **45/45**, API Vercel `node --test apps/web/api/_api.test.mjs` **7/7**, build correcto. Pantallas de login revisadas en navegador (390 px) con un Supabase ficticio.
+- Pendiente de la usuaria: ejecutar SQL, crear código, desactivar registro público, URLs de redirección y variables `VITE_SUPABASE_*` en Vercel. Sin ellas la app muestra «Falta configuración»: no pasar a `main` antes.
+- No verificado aún contra el Supabase real ni en iPhone.

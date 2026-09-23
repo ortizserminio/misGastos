@@ -1,18 +1,6 @@
-import { createHash, timingSafeEqual } from 'node:crypto';
+import { createHash } from 'node:crypto';
+import { json, ApiError, fail, supabase, sendError } from './_supabase.mjs';
 
-const json = (res, status, body) => {
-  res.status(status).setHeader('Cache-Control', 'no-store').json(body);
-};
-
-class ApiError extends Error {
-  constructor(status, error, message) { super(message); this.status = status; this.error = error; }
-}
-
-function fail(message) { throw new ApiError(422, 'validation_error', message); }
-function text(value, label, max) {
-  if (typeof value !== 'string' || value.trim().length < 1 || value.length > max || /[\u0000-\u001f\u007f]/.test(value)) fail(`${label}: texto obligatorio.`);
-  return value.trim();
-}
 // Wallet may send "12,50 €", "€12.50", "1.234,56 €" or a number; keep only the amount.
 export function cents(value) {
   let raw = typeof value === 'number' ? String(value) : String(value ?? '').replace(/[^\d.,-]/g, '');
@@ -38,30 +26,15 @@ export function isoDate(value) {
   return d && Number.isFinite(parsed.getTime()) && parsed.toISOString().slice(0, 10) === d ? d : today;
 }
 const optional = (value, max) => typeof value === 'string' && value.trim() ? value.trim().replace(/[\u0000-\u001f\u007f]/g, ' ').slice(0, max) : null;
-function auth(req) {
-  const expected = (process.env.SHORTCUT_TOKEN ?? '').trim();
+export const hashToken = token => createHash('sha256').update(token).digest('hex');
+// Each user has a personal token; only its SHA-256 is stored in shortcut_tokens.
+async function userFor(req) {
   const header = (req.headers.authorization ?? '').trim();
   const supplied = /^bearer\s+/i.test(header) ? header.replace(/^bearer\s+/i, '').trim() : '';
-  const a = Buffer.from(supplied); const b = Buffer.from(expected);
-  if (!expected || a.length !== b.length || !timingSafeEqual(a, b)) throw new ApiError(401, 'unauthorized', 'Token Bearer no válido.');
-}
-function config() {
-  const url = process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!url || !key) throw new ApiError(500, 'configuration_error', 'Faltan variables de Supabase en Vercel.');
-  return { url: url.replace(/\/$/, ''), key };
-}
-async function supabase(path, options = {}) {
-  const { url, key } = config();
-  const response = await fetch(`${url}/rest/v1/${path}`, {
-    ...options,
-    headers: { apikey: key, Authorization: `Bearer ${key}`, 'Content-Type': 'application/json', ...(options.headers ?? {}) },
-  });
-  if (!response.ok) {
-    const detail = (await response.text()).replace(/\s+/g, ' ').slice(0, 300);
-    throw new ApiError(502, 'database_error', `Supabase respondió HTTP ${response.status}: ${detail}`);
-  }
-  return response.status === 204 ? null : response.json();
+  if (supplied.length < 20 || supplied.length > 200) throw new ApiError(401, 'unauthorized', 'Token Bearer no válido.');
+  const rows = await supabase(`rest/v1/shortcut_tokens?token_hash=eq.${hashToken(supplied)}&select=user_id`);
+  if (!rows?.length) throw new ApiError(401, 'unauthorized', 'Token Bearer no válido.');
+  return rows[0].user_id;
 }
 export function input(body) {
   if (typeof body === 'string') { try { body = JSON.parse(body); } catch { fail('El cuerpo debe ser JSON.'); } }
@@ -81,28 +54,23 @@ function transaction(row) {
 
 export default async function handler(req, res) {
   try {
-    auth(req);
+    const userId = await userFor(req);
     const path = new URL(req.url, 'https://misgastos.invalid').pathname;
     if (req.method === 'GET' && path.endsWith('/health')) return json(res, 200, { ok: true, service: 'misGastos' });
-    if (req.method === 'GET' && path.endsWith('/transactions')) {
-      const rows = await supabase('shortcut_events?select=*&order=occurred_at.desc,created_at.desc');
-      return json(res, 200, { items: rows.map(transaction) });
-    }
-    if (req.method === 'GET' && path.endsWith('/card-mappings')) return json(res, 200, { items: [] });
     if (req.method === 'POST' && path.endsWith('/shortcut')) {
       const value = input(req.body);
-      const existing = await supabase(`shortcut_events?event_id=eq.${encodeURIComponent(value.eventId)}&select=*`);
+      const existing = await supabase(`rest/v1/shortcut_events?event_id=eq.${encodeURIComponent(value.eventId)}&user_id=eq.${userId}&select=*`);
       if (existing.length) {
         const row = existing[0];
         if (row.amount_cents !== value.amountCents || row.merchant !== value.merchant) throw new ApiError(409, 'idempotency_conflict', 'Este idEvento ya se usó con otro pago. Usa un idEvento con segundos (por ejemplo la fecha con formato ISO 8601) o quítalo.');
         return json(res, 200, { ok: true, message: 'Este pago ya estaba registrado.', transaction: transaction(row), duplicate: true });
       }
       const bank = value.bank ?? value.card ?? 'Apple Pay';
-      const rows = await supabase('shortcut_events', { method: 'POST', headers: { Prefer: 'return=representation' }, body: JSON.stringify({ event_id: value.eventId, amount_cents: value.amountCents, merchant: value.merchant, bank, card: value.card, occurred_at: `${value.date}T12:00:00Z` }) });
+      const rows = await supabase('rest/v1/shortcut_events', { method: 'POST', headers: { Prefer: 'return=representation' }, body: JSON.stringify({ event_id: value.eventId, user_id: userId, amount_cents: value.amountCents, merchant: value.merchant, bank, card: value.card, occurred_at: `${value.date}T12:00:00Z` }) });
       return json(res, 201, { ok: true, message: `Gasto de ${(value.amountCents / 100).toFixed(2).replace('.', ',')} € en ${value.merchant} registrado.`, transaction: transaction(rows[0]), duplicate: false });
     }
     throw new ApiError(404, 'not_found', 'Ruta no disponible.');
   } catch (error) {
-    return json(res, error instanceof ApiError ? error.status : 500, { error: error.error ?? 'internal_error', message: error.message ?? 'Error interno.' });
+    return sendError(res, error);
   }
 }
