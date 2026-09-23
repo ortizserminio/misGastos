@@ -1,7 +1,7 @@
 import Patrimonio from './Patrimonio';
 import {useEffect,useRef,useState} from 'react';
 import {Wallet,MessageCircle,Plus,ChartNoAxesColumnIncreasing,Settings as SettingsIcon,ArrowUpRight,ArrowDownLeft,ChevronRight,ChevronLeft,SlidersHorizontal,PieChart,ArrowLeft,Check,ShieldCheck,Sparkles} from 'lucide-react';
-import {type Data,type Transaction,emptyData,validateBackup,today,money,summary,demoData,mergeTransactions,parseMoney} from './domain';
+import {type Data,type Transaction,emptyData,validateBackup,today,money,summary,demoData,mergeTransactions,parseMoney,byRecent} from './domain';
 import TransactionModal from './TransactionModal';
 import Shortcut from './Shortcut';
 import Reports from './Reports';
@@ -20,10 +20,10 @@ export default function App({cloud}:{cloud?:Cloud}={}){
  function save(next:Data,restore=false){if(cloud){setData(next);dataRef.current=next;setError('');cloud.save(next);return;}if(initial.error&&!restore&&error)throw Error('Restaura una copia válida antes de modificar los datos.');try{localStorage.setItem(KEY,JSON.stringify(next));setData(next);setError('');}catch(e){setError('No se pudo guardar en este navegador. Exporta tus datos y libera espacio.');throw e;}}
  function change(next:Data,restore=false){try{save(next,restore);}catch(e){setNotice((e as Error).message);}}
  function add(t:Transaction){save({...data,transactions:[t,...data.transactions.filter(v=>v.id!==t.id)]});setModal(false);setEditing(null);setNotice('Movimiento guardado.');}
- const stats=summary(data.transactions,month),sorted=[...stats.current].sort((a,b)=>b.date.localeCompare(a.date));
+ const stats=summary(data.transactions,month),sorted=byRecent(stats.current);
  const nav=(name:string)=>{setTab(name);setPage('');setNotice('');};
  const dataRef=useRef(data);dataRef.current=data;
- const addShortcutItems=(items:Transaction[])=>{const cur=dataRef.current,merged=mergeTransactions(cur.transactions,items,cur.dismissed);if(merged.length===cur.transactions.length)return 0;const names=cur.categories.map(c=>c.name);save({...cur,transactions:[...merged.slice(cur.transactions.length).map(t=>tidyTransaction(t,names,cur.merchantRules)),...cur.transactions],accounts:Array.from(new Set([...cur.accounts,...items.map(t=>t.bank)]))});return merged.length-cur.transactions.length;};
+ const addShortcutItems=(items:Transaction[])=>{const cur=dataRef.current,times=new Map(items.flatMap(i=>i.externalId&&i.time?[[i.externalId,i.time] as const]:[]));let filled=0;const existing=cur.transactions.map(t=>t.source==='shortcut'&&!t.time&&t.externalId&&times.has(t.externalId)?(filled++,{...t,time:times.get(t.externalId)}):t);const merged=mergeTransactions(existing,items,cur.dismissed),names=cur.categories.map(c=>c.name),added=merged.slice(existing.length).map(t=>tidyTransaction(t,names,cur.merchantRules));if(!added.length&&!filled)return 0;save({...cur,transactions:[...added,...existing],accounts:Array.from(new Set([...cur.accounts,...items.map(t=>t.bank)]))});return added.length;};
  // Expenses sent by the Apple Pay shortcut are stored per user in Supabase and merged here on start.
  useEffect(()=>{const tidied=tidyData(dataRef.current);if(tidied)change(tidied);if(!cloud)return;let alive=true;cloud.fetchShortcut().then(items=>{if(alive)addShortcutItems(items);}).catch(()=>{});return()=>{alive=false;};},[]);
  useEffect(()=>{if(!/jsdom/i.test(navigator.userAgent))window.scrollTo(0,0);},[tab,page]);

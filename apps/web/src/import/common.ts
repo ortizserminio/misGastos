@@ -1,6 +1,6 @@
 import {validDate} from '../domain';
 export type RowKind='card'|'transfer'|'bizum'|'interest'|'trade'|'cash'|'salary'|'tax'|'other';
-export type ImportRow={date:string;amountCents:number;description:string;kind:RowKind;counterpartyName?:string;counterpartyIban?:string;mcc?:string;bankCategory?:string;instrument?:string;externalId:string};
+export type ImportRow={date:string;time?:string;amountCents:number;description:string;kind:RowKind;counterpartyName?:string;counterpartyIban?:string;mcc?:string;bankCategory?:string;instrument?:string;externalId:string};
 export type ParsedStatement={format:'traderepublic'|'bbva'|'n26'|'csv';bankName:string;ownIban?:string;opening?:{date:string;valueCents:number};rows:ImportRow[]};
 export function parseAmount(raw:string){let v=raw.replace(/[€\s ]/g,'');if(!/^[+-]?\d[\d.,]*$/.test(v))throw Error(`Importe no válido: ${raw}`);const sign=v.startsWith('-')?-1:1;v=v.replace(/^[+-]/,'');const comma=v.lastIndexOf(','),dot=v.lastIndexOf('.');if(comma>dot)v=v.replace(/\./g,'').replace(',','.');else if(comma>=0)v=v.replace(/,/g,'');else if(/^\d{1,3}(\.\d{3})+$/.test(v))v=v.replace(/\./g,'');const n=Number(v);if(!Number.isFinite(n))throw Error(`Importe no válido: ${raw}`);return sign*Math.round(n*100);}
 export function parseDate(raw:string){const s=raw.trim();let m=s.match(/^(\d{4})-(\d{2})-(\d{2})/),d='';if(m)d=`${m[1]}-${m[2]}-${m[3]}`;else if((m=s.match(/^(\d{1,2})[./-](\d{1,2})[./-](\d{4})$/)))d=`${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;if(!validDate(d))throw Error(`Fecha no válida: ${raw}`);return d;}

@@ -29,8 +29,10 @@ export function applyReview(rows:ReviewRow[],data:Data,account:string){
    const p=findPair(data.transactions,{amountCents,from,to,date:r.row.date,externalId:r.row.externalId},used);
    if(p){used.add(p.id);transactions=transactions.map(t=>t.id===p.id?{...t,bank:from,toAccount:to,pairedExternalId:r.row.externalId}:t);paired++;continue;}
   }
-  created.push({id:crypto.randomUUID(),type:r.type,amountCents,merchant:r.merchant,bank:r.type==='transfer'?from:account,...(r.type==='transfer'?{toAccount:to}:{}),category:r.type==='transfer'?TRANSFER:r.category,date:r.row.date,source:'import',externalId:r.row.externalId});
+  created.push({id:crypto.randomUUID(),type:r.type,amountCents,merchant:r.merchant,bank:r.type==='transfer'?from:account,...(r.type==='transfer'?{toAccount:to}:{}),category:r.type==='transfer'?TRANSFER:r.category,date:r.row.date,...(r.row.time?{time:r.row.time}:{}),source:'import',externalId:r.row.externalId});
  }
+ // Statements listed oldest first are reversed so, within a day, the later movement is stored (and shown) first.
+ if(rows.length>1&&rows[0].row.date<rows[rows.length-1].row.date)created.reverse();
  const names=created.flatMap(t=>[t.bank,t.toAccount??'']).filter(Boolean);
  return {data:{...data,transactions:[...created,...transactions],accounts:Array.from(new Set([...data.accounts,...names]))},created:created.length,paired};
 }

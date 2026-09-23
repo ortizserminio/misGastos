@@ -1,5 +1,5 @@
 import {describe,it,expect} from 'vitest';
-import {parseMoney, summary, validateBackup, mergeTransactions, emptyData} from './domain';
+import {parseMoney, summary, validateBackup, mergeTransactions, emptyData, byRecent, timeInSpain} from './domain';
 const tx={id:'one',type:'expense' as const,amountCents:1050,merchant:'Tienda demo',bank:'Efectivo',category:'Otros',date:'2026-09-22',source:'manual' as const};
 describe('money and data integrity',()=>{
  it('groups imported category names without prototype collisions',()=>{const result=summary([{...tx,category:'constructor'}], '2026-09');expect(result.grouped).toEqual([['constructor',1050]]);});
@@ -15,4 +15,8 @@ describe('data v2',()=>{
 });
 describe('shortcut expenses deleted by the user',()=>{
  it('are not brought back by a later sync and survive a backup round trip',()=>{const remote={...tx,id:'r1',source:'shortcut' as const,externalId:'ev-1'};expect(mergeTransactions([tx],[remote],['ev-1'])).toHaveLength(1);const d={...emptyData(),dismissed:['ev-1']};expect(validateBackup(JSON.stringify(d)).dismissed).toEqual(['ev-1']);expect(validateBackup(JSON.stringify(emptyData())).dismissed).toBeUndefined();});
+});
+describe('ordering',()=>{
+ it('shows the most recent first using the time when known and list order otherwise',()=>{const a={...tx,id:'a',date:'2026-09-23',time:'09:00'},b={...tx,id:'b',date:'2026-09-23',time:'17:21'},c={...tx,id:'c',date:'2026-09-24'},d={...tx,id:'d',date:'2026-09-22'},e={...tx,id:'e',date:'2026-09-23'};expect(byRecent([a,d,b,e,c]).map(t=>t.id)).toEqual(['c','b','a','e','d']);});
+ it('accepts only valid times and converts UTC timestamps to Spanish time',()=>{const d={...emptyData(),transactions:[{...tx,time:'17:21'}]};expect(validateBackup(JSON.stringify(d)).transactions[0].time).toBe('17:21');expect(()=>validateBackup(JSON.stringify({...d,transactions:[{...tx,time:'25:00'}]}))).toThrow();expect(timeInSpain('2026-09-23T15:21:27Z')).toBe('17:21');});
 });

@@ -1,4 +1,5 @@
 import {type ImportRow,type ParsedStatement,type RowKind,parseAmount,parseDate} from './common';
+import {timeInSpain} from '../domain';
 export const isTradeRepublic=(header:string[])=>['transaction_id','counterparty_iban','asset_class'].every(h=>header.includes(h));
 function kindOf(type:string):RowKind{if(type.startsWith('CARD_TRANSACTION'))return 'card';if(type.startsWith('TRANSFER'))return 'transfer';if(type==='INTEREST_PAYMENT')return 'interest';if(type==='BUY'||type==='SELL')return 'trade';return 'other';}
 export function parseTradeRepublic(rows:string[][]):ParsedStatement{
@@ -10,7 +11,8 @@ export function parseTradeRepublic(rows:string[][]):ParsedStatement{
   const m=description.match(/^(?:Incoming transfer from|Outgoing transfer for)\s+(.+?)\s*(?:\(([A-Z]{2}\d{2}[A-Z0-9]{10,30})\))?\s*$/);
   const counterpartyName=col(r,'counterparty_name')||m?.[1],counterpartyIban=col(r,'counterparty_iban')||m?.[2];
   const label=kind==='card'||kind==='trade'?name:kind==='interest'?'Intereses Trade Republic':counterpartyName;
-  out.push({date:parseDate(col(r,'date')||col(r,'datetime')),amountCents,kind,description:(label||description.replace(/null$/,'')||col(r,'type')).slice(0,200),...(kind!=='card'&&counterpartyName?{counterpartyName}:{}),...(counterpartyIban?{counterpartyIban}:{}),...(col(r,'mcc_code')?{mcc:col(r,'mcc_code')}:{}),...(kind==='trade'?{instrument:name||col(r,'symbol')}:{}),externalId:`tr:${id}`});
+  const time=col(r,'datetime')?timeInSpain(col(r,'datetime')):undefined;
+  out.push({date:parseDate(col(r,'date')||col(r,'datetime')),...(time?{time}:{}),amountCents,kind,description:(label||description.replace(/null$/,'')||col(r,'type')).slice(0,200),...(kind!=='card'&&counterpartyName?{counterpartyName}:{}),...(counterpartyIban?{counterpartyIban}:{}),...(col(r,'mcc_code')?{mcc:col(r,'mcc_code')}:{}),...(kind==='trade'?{instrument:name||col(r,'symbol')}:{}),externalId:`tr:${id}`});
  }
  if(!out.length)throw Error('No hay movimientos en este CSV de Trade Republic.');
  return {format:'traderepublic',bankName:'Trade Republic',rows:out};
