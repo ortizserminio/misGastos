@@ -73,6 +73,13 @@ describe('personal finance workflow',()=>{
   expect(saved.transactions[0]).toMatchObject({merchant:'Cafetería campus',category:'Restauración'});
   expect(saved.merchantRules).toEqual([{match:'inturfood',name:'Cafetería campus',category:'Restauración'}]);
  });
+ it('removes a leftover account and its test movements from Patrimonio',()=>{
+  localStorage.setItem('misgastos.local.v1',JSON.stringify({...emptyData(),accounts:['Efectivo','Banco de prueba'],transactions:[{id:'p',type:'expense',amountCents:250,merchant:'Comercio de prueba',bank:'Banco de prueba',category:'Otros',date:today(),source:'shortcut',externalId:'ev-p'}]}));
+  render(<App/>);fireEvent.click(screen.getByRole('button',{name:/Patrimonio/}));
+  fireEvent.click(screen.getByRole('button',{name:'Borrar cuenta Banco de prueba'}));
+  const saved=JSON.parse(localStorage.getItem('misgastos.local.v1')!);
+  expect(saved.accounts).toEqual(['Efectivo']);expect(saved.transactions).toHaveLength(0);expect(saved.dismissed).toEqual(['ev-p']);
+ });
  it('adds and removes categories moving movements to Otros',()=>{
   render(<App/>);fireEvent.click(screen.getByRole('button',{name:'Ajustes'}));
   fireEvent.click(screen.getByRole('button',{name:/Categorías/}));
