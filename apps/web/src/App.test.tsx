@@ -43,7 +43,7 @@ describe('personal finance workflow',()=>{
   fireEvent.click(screen.getByRole('button',{name:/Generar mi token/}));
   expect(await screen.findByDisplayValue('token-personal-123456789012345')).toBeTruthy();
   fireEvent.click(screen.getByRole('button',{name:/Traer gastos del atajo/}));
-  expect(await screen.findByText('No hay gastos nuevos del atajo.')).toBeTruthy();
+  expect(await screen.findByText(/No hay gastos nuevos del atajo\. Último recibido en el servidor: Café del atajo, 2,50/)).toBeTruthy();
   fireEvent.click(within(screen.getByRole('navigation')).getByRole('button',{name:'Ajustes'}));
   fireEvent.click(screen.getByRole('button',{name:'Cerrar sesión'}));
   expect(cloud.logout).toHaveBeenCalled();

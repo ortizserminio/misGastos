@@ -20,3 +20,7 @@ describe('ordering',()=>{
  it('shows the most recent first using the time when known and list order otherwise',()=>{const a={...tx,id:'a',date:'2026-09-23',time:'09:00'},b={...tx,id:'b',date:'2026-09-23',time:'17:21'},c={...tx,id:'c',date:'2026-09-24'},d={...tx,id:'d',date:'2026-09-22'},e={...tx,id:'e',date:'2026-09-23'};expect(byRecent([a,d,b,e,c]).map(t=>t.id)).toEqual(['c','b','a','e','d']);});
  it('accepts only valid times and converts UTC timestamps to Spanish time',()=>{const d={...emptyData(),transactions:[{...tx,time:'17:21'}]};expect(validateBackup(JSON.stringify(d)).transactions[0].time).toBe('17:21');expect(()=>validateBackup(JSON.stringify({...d,transactions:[{...tx,time:'25:00'}]}))).toThrow();expect(timeInSpain('2026-09-23T15:21:27Z')).toBe('17:21');});
 });
+describe('shortcut sync robustness',()=>{
+ it('skips an invalid remote expense instead of blocking the others',()=>{const good={...tx,id:'g',source:'shortcut' as const,externalId:'g'},bad={...good,id:'b',externalId:'b',time:'24:15'};expect(mergeTransactions([],[bad,good]).map(t=>t.id)).toEqual(['g']);});
+ it('never formats a Spanish time as 24:xx',()=>{expect(timeInSpain('2026-09-24T22:15:00Z')).toBe('00:15');});
+});

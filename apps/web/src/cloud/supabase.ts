@@ -19,5 +19,5 @@ export async function createShortcutToken(db:SupabaseClient,uid:string){
 export async function hasShortcutToken(db:SupabaseClient){return check(await db.from('shortcut_tokens').select('created_at').limit(1)).length>0;}
 export async function fetchShortcutEvents(db:SupabaseClient):Promise<Transaction[]>{
  const rows=check(await db.from('shortcut_events').select('event_id,amount_cents,merchant,bank,occurred_at,created_at').order('occurred_at',{ascending:false}));
- return rows.map(r=>({id:r.event_id,type:'expense',amountCents:r.amount_cents,merchant:r.merchant,bank:r.bank||'Efectivo',category:'Otros',date:String(r.occurred_at).slice(0,10),...(r.created_at&&timeInSpain(r.created_at)?{time:timeInSpain(r.created_at)}:{}),source:'shortcut',externalId:r.event_id}));
+ return rows.map(r=>({id:String(r.event_id).slice(0,200),type:'expense',amountCents:r.amount_cents,merchant:String(r.merchant??'').trim().slice(0,200)||'Apple Pay',bank:String(r.bank??'').trim().slice(0,100)||'Efectivo',category:'Otros',date:String(r.occurred_at).slice(0,10),...(r.created_at&&timeInSpain(r.created_at)?{time:timeInSpain(r.created_at)}:{}),source:'shortcut',externalId:String(r.event_id).slice(0,200)}));
 }

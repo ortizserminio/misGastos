@@ -1,6 +1,6 @@
 import {useEffect,useState} from 'react';
 import {ArrowLeft,Zap,RefreshCw,KeyRound,Copy} from 'lucide-react';
-import {download,type Transaction} from './domain';
+import {download,money,type Transaction} from './domain';
 type ShortcutCloud={createToken:()=>Promise<string>;hasToken:()=>Promise<boolean>;fetchShortcut:()=>Promise<Transaction[]>};
 export default function Shortcut({onBack,onSync,cloud}:{onBack:()=>void;onSync:(items:Transaction[])=>number;cloud?:ShortcutCloud}){
  const [configured,setConfigured]=useState<boolean|null>(null),[token,setToken]=useState(''),[busy,setBusy]=useState(false),[message,setMessage]=useState('');
@@ -8,7 +8,7 @@ export default function Shortcut({onBack,onSync,cloud}:{onBack:()=>void;onSync:(
  const endpoint=`${location.origin}/api/shortcut`;
  useEffect(()=>{cloud?.hasToken().then(setConfigured).catch(()=>setConfigured(false));},[cloud]);
  async function run(action:()=>Promise<void>){setBusy(true);setMessage('');try{await action();}catch(e){setMessage((e as Error).message||'Algo ha fallado.');}finally{setBusy(false);}}
- const sync=async()=>{if(!cloud)return;const added=onSync(await cloud.fetchShortcut());setMessage(added?`${added} gastos nuevos del atajo añadidos.`:'No hay gastos nuevos del atajo.');};
+ const sync=async()=>{if(!cloud)return;const items=await cloud.fetchShortcut(),added=onSync(items),last=[...items].sort((a,b)=>b.date.localeCompare(a.date)||(b.time??'').localeCompare(a.time??''))[0];setMessage(`${added?`${added} gastos nuevos del atajo añadidos.`:'No hay gastos nuevos del atajo.'}${last?` Último recibido en el servidor: ${last.merchant}, ${money(last.amountCents)}, ${new Date(last.date+'T12:00:00').toLocaleDateString('es-ES',{day:'numeric',month:'short'})}${last.time?` ${last.time}`:''}.`:' El servidor aún no tiene gastos del atajo.'}`);};
  const copy=(value:string)=>navigator.clipboard?.writeText(value).then(()=>setMessage('Copiado.')).catch(()=>setMessage('No se ha podido copiar; selecciónalo y cópialo a mano.'));
  const template={importe:'[Variable Importe]',comercio:'[Variable Comercio]',tarjeta:'[Variable Tarjeta o pase]',banco:'[Banco fijo]',fecha:'[Fecha yyyy-MM-dd]',idEvento:'[UUID estable por evento]'};
  return <><button className="back" onClick={onBack}><ArrowLeft size={20}/> Ajustes</button><div className="page-heading"><span className="eyebrow">AUTOMATIZACIONES</span><h1>Tu atajo, tus cuentas.</h1><p>Importe, comercio y banco. Cada dato en su sitio.</p></div>
