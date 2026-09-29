@@ -9,3 +9,11 @@
 /* iPhone: 16px text in fields avoids Safari's zoom on focus; pinch zoom is disabled like in a native app. */
 @media (pointer:coarse){input,select,textarea{font-size:16px!important}}
 html,body{touch-action:pan-x pan-y}
+
+/* Launch screen (also inlined in index.html so it shows before the JS bundle loads). */
+.splash{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:linear-gradient(160deg,#8b5cf6 0%,#7c3aed 45%,#5b21b6 100%);color:white;padding:env(safe-area-inset-top) 16px env(safe-area-inset-bottom)}
+.splash-logo{width:112px;height:112px;border-radius:32px;background:white;color:#7c3aed;display:grid;place-items:center;box-shadow:0 18px 40px #2e106540}
+.splash-name{font-size:34px;font-weight:800;letter-spacing:-1px}.splash-name span{color:#e9ddff}
+.splash-tagline{position:absolute;bottom:calc(36px + env(safe-area-inset-bottom));color:#ffffffb3;font-size:13px}
+@media (prefers-reduced-motion:no-preference){.splash-logo{animation:splash-pulse 1.6s ease-in-out infinite}}
+@keyframes splash-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
