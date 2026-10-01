@@ -1,0 +1,10 @@
+.review-card{margin-bottom:22px;border-color:#d9c8fb;box-shadow:0 8px 24px #7c3aed14}
+.review-card .hint{margin:0 0 6px}
+.review-list{list-style:none;margin:0;padding:0}
+.review-item{display:flex;flex-direction:column;gap:6px;padding:16px 0;border-top:1px solid var(--border)}
+.review-item:first-child{border-top:0}
+.review-head{display:flex;align-items:center;gap:12px}.review-head input{flex:1;font-weight:600}.review-head strong{white-space:nowrap;font-size:17px}
+.review-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}.review-fields label{margin:4px 0}
+.review-check{flex-direction:row;align-items:center;gap:10px;margin:4px 0;font-weight:500}.review-check input{width:22px;min-height:22px;accent-color:var(--purple)}
+.review-actions{display:flex;justify-content:flex-end;align-items:center;gap:10px}
+@media(max-width:760px){.review-fields{grid-template-columns:1fr}}
