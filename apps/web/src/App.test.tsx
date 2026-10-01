@@ -85,11 +85,13 @@ describe('personal finance workflow',()=>{
   const item={id:'ev9',type:'expense' as const,amountCents:110,merchant:'INTURFOOD ALTABIX',bank:'N26',category:'Otros',date:today(),source:'shortcut' as const,externalId:'ev9'};
   const cloud={email:'ana@ejemplo.com',initial:{...emptyData(),assets:[acc('N26'),acc('BBVA')],accounts:['Efectivo','N26','BBVA']},save:vi.fn(),logout:vi.fn(),createToken:vi.fn(async()=>'x'),hasToken:vi.fn(async()=>true),fetchShortcut:vi.fn(async()=>[item])};
   render(<App cloud={cloud}/>);
-  const review=await screen.findByRole('region',{name:'Gastos por revisar'});
+  fireEvent.click(await screen.findByRole('button',{name:/Gastos por revisar/}));
   expect(cloud.save.mock.calls[0][0].transactions[0].pending).toBe(true);
-  fireEvent.change(within(review).getByLabelText('Cuenta de INTURFOOD ALTABIX'),{target:{value:'BBVA'}});
-  fireEvent.click(within(review).getByRole('button',{name:/Confirmar/}));
-  expect(screen.queryByRole('region',{name:'Gastos por revisar'})).toBeNull();
+  fireEvent.change(screen.getByLabelText('Cuenta de INTURFOOD ALTABIX'),{target:{value:'BBVA'}});
+  fireEvent.click(screen.getByRole('button',{name:/Confirmar/}));
+  expect(screen.getByText('Todo revisado')).toBeTruthy();
+  fireEvent.click(screen.getByRole('button',{name:'Volver a Gastos'}));
+  expect(screen.queryByRole('button',{name:/Gastos por revisar/})).toBeNull();
   const saved=cloud.save.mock.calls.at(-1)![0].transactions.find((t:{id:string})=>t.id==='ev9');
   expect(saved).toMatchObject({bank:'BBVA'});expect(saved.pending).toBeUndefined();
  });
