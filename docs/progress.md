@@ -85,3 +85,9 @@
 - Commit de presupuestos: `2642124` en `codex/presupuestos-reales`. La rama se integró con `origin/main` en `7067c45`, que contiene la pantalla compacta de gastos del atajo por revisar. Los conflictos de `App.tsx` y `domain.ts` se resolvieron conservando ambos flujos y los campos `pending`/`skipBalance` en datos v3.
 - Prueba nueva de migración: una copia v2 con presupuesto anterior y gasto del atajo pendiente pasa a v3 sin perder `pending`, `skipBalance` ni el importe previsto; también supera un segundo ciclo de copia/restauración.
 - Resultado combinado: `npm.cmd run test:web` **91/91**, `npm.cmd run test:api` **8/8**, `npm.cmd run test:vercel` **10/10** y `npm.cmd run build` **PASS** (TypeScript, Vite y caché PWA). La subida remota y el estado de Vercel se registrarán aparte cuando se verifiquen.
+
+## Subida de presupuestos — 2026-10-01
+
+- Rama `codex/presupuestos-reales` subida a GitHub con commit de integración `49a19bc`; solicitud de cambio [#3](https://github.com/ortizserminio/misGastos/pull/3) abierta contra `main`, estado `CLEAN`.
+- GitHub muestra el check `Vercel` en `SUCCESS` y el comentario de Vercel indica `Ready` para la [vista previa](https://mis-gastos-git-codex-presupuestos-reales-e24developer.vercel.app). La petición HTTP directa desde este entorno agotó el tiempo de conexión; la verificación de disponibilidad se basa en el estado reportado por Vercel/GitHub, no en un recorrido manual de la URL externa.
+- Este despliegue es de vista previa de la rama. Producción requiere fusionar la solicitud con `main`; no se ha hecho esa fusión.
