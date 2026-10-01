@@ -1,0 +1,4 @@
+import type {ReactNode} from 'react';
+import {parseMoney} from '../domain';
+export function parseNonnegative(value:string){if(value.trim()==='0'||value.trim()==='0,00'||value.trim()==='0.00')return 0;return parseMoney(value);}
+export function Sheet({open,title,onClose,error,children}:{open:boolean;title:string;onClose:()=>void;error:string;children:ReactNode}){if(!open)return null;return <div className="budget-sheet-layer" onMouseDown={e=>{if(e.target===e.currentTarget)onClose();}}><section className="budget-sheet" role="dialog" aria-modal="true" aria-label={title}><div className="handle"/><div className="budget-sheet-head"><h2>{title}</h2><button className="icon-button" aria-label="Cerrar" onClick={onClose}>×</button></div>{error&&<p className="error" role="alert">{error}</p>}{children}</section></div>;}

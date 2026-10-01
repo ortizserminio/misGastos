@@ -62,3 +62,20 @@
 - Pruebas: Vitest **45/45**, API Vercel `node --test apps/web/api/_api.test.mjs` **7/7**, build correcto. Pantallas de login revisadas en navegador (390 px) con un Supabase ficticio.
 - Pendiente de la usuaria: ejecutar SQL, crear código, desactivar registro público, URLs de redirección y variables `VITE_SUPABASE_*` en Vercel. Sin ellas la app muestra «Falta configuración»: no pasar a `main` antes.
 - No verificado aún contra el Supabase real ni en iPhone.
+
+## Presupuestos reales — 2026-10-01 (en curso)
+
+- Usuario aprobó diseño y plan, pidió mantener la entrada desde Gastos y la estética actual. Rama `codex/presupuestos-reales`; sin publicación ni conexión de cuentas.
+- Ruling: trabajar en la carpeta actual de misGastos (repositorio anidado) porque el proyecto no estaba en el workspace abierto y la escritura requiere escalación; la rama se creó tras descubrir que el repositorio propio estaba en `main`. No se ha movido ni copiado el proyecto.
+- Baseline antes de cambios: web `npm.cmd test` 51 pasadas, 1 suite sin cargar por `pdfjs-dist` ausente; API `node --test apps/api/*.test.mjs` 8/8. `npm.cmd ci --offline --no-audit --no-fund` restauró 122 paquetes desde caché.
+- Agente modelo: Data v3, migración, cálculos y 9/9 pruebas dirigidas, build correcto. Supervisor detectó tres fallos reproducibles (categoría `constructor`, renombrado a sí misma y partida no recurrente clonada); corrección encargada. Estado de revisión: NO SUPERADA hasta relectura.
+- Agente interfaz: en curso; owns App.tsx y budget-ui. Coordinador actualizó prueba heredada `domain.test.ts` para versión 3. Próximo paso: integrar, ejecutar suite completa y navegador sintético, revisar con supervisor.
+
+## Presupuestos reales — cierre de implementación 2026-10-01
+
+- Implementados en `codex/presupuestos-reales`: datos v3 con migración v1/v2, planes mensuales, ingresos manuales o por partidas (recurrentes o puntuales), gasto previsto, límites por categoría, mensualización de recurrentes, deudas, objetivos de ahorro, histórico con instantánea del ahorro previsto y resumen del gasto real procedente solo de movimientos.
+- Entrada «Mis presupuestos» desde Gastos. En móvil, las cuatro tarjetas del plan se muestran en una matriz 2×2. Recorrido sintético local a 390×844: tarjetas en dos columnas (x=20 y 192) y dos filas (y=276 y 479), sin desbordamiento horizontal.
+- Navegador con datos sintéticos en origen aislado 5178: guardados ingreso manual 1800 €, gasto previsto 700 €, límite Alimentación 250 €, recurrente anual 120 € mostrado como 10 €/mes y deuda de 50 €. Tras reiniciar el servidor, la tarjeta de inicio conservó los 700 € disponibles. La pantalla de objetivos se abrió; el alta con campo de fecha no se completó en el recorrido automatizado por el control de fecha del navegador. El flujo sí tiene pruebas de componente y de modelo.
+- Fallos P1/P2 de la revisión independiente corregidos. El supervisor documentó el cierre y dictamen **REVISIÓN SUPERADA** en `docs/reviews/budgets-2026-10-01.md`; distinguió su verificación del recorrido del coordinador.
+- Verificación final del coordinador: `npm.cmd test` en apps/web **88/88**; `npm.cmd run build` **PASS** (TypeScript, Vite y 5 recursos PWA); `node --test apps/api/*.test.mjs` **8/8**. El supervisor repitió los tres comandos y una reproducción Node del histórico; resultados coincidentes.
+- No se conectaron cuentas, no se publicaron cambios ni se hicieron pagos o movimientos reales. El commit y la subida remota se registran después de esta verificación.
