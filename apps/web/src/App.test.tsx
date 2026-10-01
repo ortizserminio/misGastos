@@ -80,6 +80,21 @@ describe('personal finance workflow',()=>{
   const saved=JSON.parse(localStorage.getItem('misgastos.local.v1')!);
   expect(saved.accounts).toEqual(['Efectivo']);expect(saved.transactions).toHaveLength(0);expect(saved.dismissed).toEqual(['ev-p']);
  });
+ it('asks to review new shortcut expenses and deducts them from the chosen account',async()=>{
+  const acc=(name:string)=>({id:name,type:'Cuenta' as const,bank:name,name,color:'#111111',notes:'',valuations:[],openingBalance:{date:'2026-01-01',valueCents:10000}});
+  const item={id:'ev9',type:'expense' as const,amountCents:110,merchant:'INTURFOOD ALTABIX',bank:'N26',category:'Otros',date:today(),source:'shortcut' as const,externalId:'ev9'};
+  const cloud={email:'ana@ejemplo.com',initial:{...emptyData(),assets:[acc('N26'),acc('BBVA')],accounts:['Efectivo','N26','BBVA']},save:vi.fn(),logout:vi.fn(),createToken:vi.fn(async()=>'x'),hasToken:vi.fn(async()=>true),fetchShortcut:vi.fn(async()=>[item])};
+  render(<App cloud={cloud}/>);
+  fireEvent.click(await screen.findByRole('button',{name:/Gastos por revisar/}));
+  expect(cloud.save.mock.calls[0][0].transactions[0].pending).toBe(true);
+  fireEvent.change(screen.getByLabelText('Cuenta de INTURFOOD ALTABIX'),{target:{value:'BBVA'}});
+  fireEvent.click(screen.getByRole('button',{name:/Confirmar/}));
+  expect(screen.getByText('Todo revisado')).toBeTruthy();
+  fireEvent.click(screen.getByRole('button',{name:'Volver a Gastos'}));
+  expect(screen.queryByRole('button',{name:/Gastos por revisar/})).toBeNull();
+  const saved=cloud.save.mock.calls.at(-1)![0].transactions.find((t:{id:string})=>t.id==='ev9');
+  expect(saved).toMatchObject({bank:'BBVA'});expect(saved.pending).toBeUndefined();
+ });
  it('adds and removes categories moving movements to Otros',()=>{
   render(<App/>);fireEvent.click(screen.getByRole('button',{name:'Ajustes'}));
   fireEvent.click(screen.getByRole('button',{name:/Categorías/}));

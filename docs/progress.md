@@ -79,3 +79,9 @@
 - Fallos P1/P2 de la revisión independiente corregidos. El supervisor documentó el cierre y dictamen **REVISIÓN SUPERADA** en `docs/reviews/budgets-2026-10-01.md`; distinguió su verificación del recorrido del coordinador.
 - Verificación final del coordinador: `npm.cmd test` en apps/web **88/88**; `npm.cmd run build` **PASS** (TypeScript, Vite y 5 recursos PWA); `node --test apps/api/*.test.mjs` **8/8**. El supervisor repitió los tres comandos y una reproducción Node del histórico; resultados coincidentes.
 - No se conectaron cuentas, no se publicaron cambios ni se hicieron pagos o movimientos reales. El commit y la subida remota se registran después de esta verificación.
+
+## Integración para subida a Vercel — 2026-10-01
+
+- Commit de presupuestos: `2642124` en `codex/presupuestos-reales`. La rama se integró con `origin/main` en `7067c45`, que contiene la pantalla compacta de gastos del atajo por revisar. Los conflictos de `App.tsx` y `domain.ts` se resolvieron conservando ambos flujos y los campos `pending`/`skipBalance` en datos v3.
+- Prueba nueva de migración: una copia v2 con presupuesto anterior y gasto del atajo pendiente pasa a v3 sin perder `pending`, `skipBalance` ni el importe previsto; también supera un segundo ciclo de copia/restauración.
+- Resultado combinado: `npm.cmd run test:web` **91/91**, `npm.cmd run test:api` **8/8**, `npm.cmd run test:vercel` **10/10** y `npm.cmd run build` **PASS** (TypeScript, Vite y caché PWA). La subida remota y el estado de Vercel se registrarán aparte cuando se verifiquen.
