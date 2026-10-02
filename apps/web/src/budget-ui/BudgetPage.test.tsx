@@ -7,6 +7,23 @@ import App from '../App';
 import {emptyData,type Data} from '../domain';
 afterEach(cleanup);
 
+it('shows the compact monthly plan with icon-only entry points',()=>{
+ const data=emptyData();const months:string[]=[];
+ render(<BudgetPage data={data} month="2026-10" onMonth={value=>months.push(value)} onSave={()=>{}} onBack={()=>{}} onRecurring={()=>{}} onGoals={()=>{}}/>);
+ fireEvent.click(screen.getByRole('button',{name:'Mes anterior'}));
+ expect(months).toEqual(['2026-09']);
+ expect(screen.getByRole('heading',{name:'Presupuestos'})).toBeTruthy();
+ expect(screen.getByRole('heading',{name:'Plan del mes'})).toBeTruthy();
+ expect(screen.queryByText('TU PLAN MENSUAL')).toBeNull();
+ expect(screen.getByText('Octubre 2026')).toBeTruthy();
+ expect(screen.getByText('INGRESOS MENSUALES')).toBeTruthy();
+ expect(screen.getByText('GASTO PREVISTO')).toBeTruthy();
+ expect(screen.getByText('FIJOS MENSUALES')).toBeTruthy();
+ expect(screen.getByText('AHORRO')).toBeTruthy();
+ for(const name of ['Editar ingresos','Editar gasto previsto','Recurrentes y deudas','Editar ahorro']){
+  expect(screen.getByRole('button',{name}).textContent?.trim()).toBe('');
+ }
+});
 it('keeps a new month virtual until a valid edit and persists income, spend and category limit',()=>{
   const start=emptyData();let persisted=start;
   function Harness(){const [data,setData]=useState<Data>(persisted);return <BudgetPage data={data} month="2026-10" onMonth={()=>{}} onSave={next=>{persisted=next;setData(next);}} onBack={()=>{}} onRecurring={()=>{}} onGoals={()=>{}}/>;}
@@ -75,10 +92,11 @@ it('rejects malformed planned spend and records actual savings separately',()=>{
 it('opens the budget from the existing Gastos home card',()=>{
  localStorage.clear();render(<App/>);
  fireEvent.click(screen.getByRole('button',{name:/Mis presupuestos/}));
- expect(screen.getByRole('heading',{name:'Presupuestos.'})).toBeTruthy();
+ expect(screen.getByRole('heading',{name:'Presupuestos'})).toBeTruthy();
  fireEvent.click(screen.getByRole('button',{name:'Recurrentes y deudas'}));
  expect(screen.getByRole('heading',{name:'Recurrentes y deudas.'})).toBeTruthy();
  fireEvent.click(screen.getByRole('button',{name:'Volver a presupuestos'}));
+ fireEvent.click(screen.getByRole('button',{name:'Editar ahorro'}));
  fireEvent.click(screen.getByRole('button',{name:'Objetivos'}));
  expect(screen.getByRole('heading',{name:'Objetivos de ahorro.'})).toBeTruthy();
 });
