@@ -48,6 +48,15 @@ describe('personal finance workflow',()=>{
   expect(removed.transactions[0].investmentAssetId).toBeUndefined();
   expect(accountBalance(removed.assets[0],removed.transactions)).toBe(90000);
  });
+ it('offers investments only through the expense category',()=>{
+  render(<App/>);
+  fireEvent.click(screen.getByRole('button',{name:'Añadir movimiento'}));
+  expect(screen.getByRole('button',{name:'Gasto'}).getAttribute('aria-pressed')).toBe('true');
+  expect(screen.getByRole('button',{name:'Ingreso'})).toBeTruthy();
+  expect(screen.queryByRole('button',{name:/^Inversión$/})).toBeNull();
+  fireEvent.click(screen.getByRole('button',{name:'Siguiente'}));
+  expect(screen.getByRole('button',{name:'Inversiones'})).toBeTruthy();
+ });
  it('registers an investment from Trade Republic without counting it as an expense',()=>{
   const tr={id:'trade',type:'Cuenta' as const,bank:'Trade Republic',name:'Trade Republic',color:'#252525',notes:'',valuations:[],openingBalance:{date:'2026-01-01',valueCents:100000}};
   localStorage.setItem('misgastos.local.v1',JSON.stringify({...emptyData(),accounts:['Trade Republic'],assets:[tr]}));
