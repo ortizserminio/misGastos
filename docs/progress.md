@@ -91,3 +91,11 @@
 - Rama `codex/presupuestos-reales` subida a GitHub con commit de integración `49a19bc`; solicitud de cambio [#3](https://github.com/ortizserminio/misGastos/pull/3) abierta contra `main`, estado `CLEAN`.
 - GitHub muestra el check `Vercel` en `SUCCESS` y el comentario de Vercel indica `Ready` para la [vista previa](https://mis-gastos-git-codex-presupuestos-reales-e24developer.vercel.app). La petición HTTP directa desde este entorno agotó el tiempo de conexión; la verificación de disponibilidad se basa en el estado reportado por Vercel/GitHub, no en un recorrido manual de la URL externa.
 - Este despliegue es de vista previa de la rama. Producción requiere fusionar la solicitud con `main`; no se ha hecho esa fusión.
+
+## Aportaciones manuales a inversiones — 2026-10-02
+
+- En «+ → Inversiones» se elige una cuenta de origen, importe y un activo nuevo o existente. La operación se guarda como traspaso vinculado al activo: reduce el saldo de la cuenta y aumenta el invertido, sin entrar en los gastos del mes.
+- Si hay una compra importada con la misma cuenta, activo, fecha e importe, la operación se vincula a ella y no se descuenta dos veces. Al actualizar la valoración de una inversión se registran las aportaciones ya incluidas para no duplicarlas.
+- Borrar una inversión elimina sus aportaciones manuales y desvincula las importadas; cambiar el tipo de una inversión con aportaciones vinculadas se bloquea para evitar inconsistencias. Las copias validan que cada aportación apunte a un activo existente.
+- Las pruebas de modelo y de interfaz cubren alta, aportaciones repetidas, valoración, importación, borrado y bloqueo de conversión de tipo con aportaciones vinculadas. Verificación del coordinador: `npm.cmd test` en apps/web **96/96**; `node --test apps/api/*.test.mjs` **8/8**; `npm.cmd run test:vercel` **10/10**; `npm.cmd run build` **PASS**. Una compilación adicional con URL y clave pública sintéticas confirmó que el flujo se incluye en el bundle cuando la configuración de Supabase está presente. La compilación sin variables solo incluye la pantalla «Falta configuración», como antes.
+- La rama sigue siendo vista previa de la PR #3; esta sección no implica despliegue en producción ni comprobación en Safari/iPhone.

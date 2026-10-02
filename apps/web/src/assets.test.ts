@@ -15,3 +15,19 @@ it('moves money between own accounts without counting spending',()=>{const list=
 it('applies expenses and incomes from the opening date onwards',()=>{const list=[move({amountCents:500}),move({type:'income',amountCents:300}),move({amountCents:999,date:'2026-08-31'})];expect(accountBalance(n26,list)).toBe(19800);expect(assetSeries(n26,list)).toEqual([{date:'2026-09-01',valueCents:20000},{date:'2026-09-10',valueCents:19800}]);});
 it('keeps iban and opening balance through validation',()=>{expect(validateAssets([{...tr,iban:'ES6115860001467451815811'}])[0]).toMatchObject({iban:'ES6115860001467451815811',openingBalance:{date:'2026-09-01',valueCents:100000}});expect(()=>validateAssets([{...tr,iban:'nope'}])).toThrow();});
 it('does not deduct expenses pending review or marked as not deducted',()=>{const list=[move({amountCents:500,pending:true}),move({amountCents:300,skipBalance:true}),move({amountCents:100})];expect(accountBalance(n26,list)).toBe(19900);});
+it('moves an investment contribution from cash into an asset without changing total wealth',()=>{
+ const fund:Asset={id:'fund',type:'Inversión',bank:'Trade Republic',name:'Fondo indexado',color:'#252525',notes:'',valuations:[{date:'2026-09-01',valueCents:0}]};
+ const contribution=move({type:'transfer',amountCents:10000,bank:'Trade Republic',toAccount:fund.name,category:'Transferencia',source:'manual',investmentAssetId:fund.id});
+ expect(accountBalance(tr,[contribution])).toBe(90000);
+ expect(accountBalance(fund,[contribution])).toBe(10000);
+ expect(accountBalance(tr,[contribution])+accountBalance(fund,[contribution])).toBe(100000);
+});
+it('does not count a contribution twice after an updated investment valuation',()=>{
+ const first=move({id:'first',type:'transfer',amountCents:10000,bank:'Trade Republic',toAccount:'Fondo indexado',category:'Transferencia',source:'manual',investmentAssetId:'fund'});
+ const second=move({id:'second',type:'transfer',amountCents:5000,bank:'Trade Republic',toAccount:'Fondo indexado',category:'Transferencia',source:'manual',investmentAssetId:'fund'});
+ const fund:Asset={id:'fund',type:'Inversión',bank:'Trade Republic',name:'Fondo indexado',color:'#252525',notes:'',valuations:[{date:'2026-09-11',valueCents:12000,includedInvestmentIds:['first']}]};
+ expect(accountBalance(fund,[first,second])).toBe(17000);
+ expect(accountBalance(fund,[first])).toBe(12000);
+ expect(validateBackup(JSON.stringify({...emptyData(),transactions:[first],assets:[fund]})).assets).toEqual([fund]);
+ expect(()=>validateBackup(JSON.stringify({...emptyData(),transactions:[first],assets:[]}))).toThrow();
+});
