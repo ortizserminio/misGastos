@@ -17,3 +17,5 @@ html,body{touch-action:pan-x pan-y}
 .splash-tagline{position:absolute;bottom:calc(36px + env(safe-area-inset-bottom));color:#ffffffb3;font-size:13px}
 @media (prefers-reduced-motion:no-preference){.splash-logo{animation:splash-pulse 1.6s ease-in-out infinite}}
 @keyframes splash-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+
+.home-month-selector{justify-content:flex-end}.home-month-selector .month-selector{margin-top:0}
