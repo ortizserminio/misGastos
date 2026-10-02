@@ -62,3 +62,40 @@
 - Pruebas: Vitest **45/45**, API Vercel `node --test apps/web/api/_api.test.mjs` **7/7**, build correcto. Pantallas de login revisadas en navegador (390 px) con un Supabase ficticio.
 - Pendiente de la usuaria: ejecutar SQL, crear código, desactivar registro público, URLs de redirección y variables `VITE_SUPABASE_*` en Vercel. Sin ellas la app muestra «Falta configuración»: no pasar a `main` antes.
 - No verificado aún contra el Supabase real ni en iPhone.
+
+## Presupuestos reales — 2026-10-01 (en curso)
+
+- Usuario aprobó diseño y plan, pidió mantener la entrada desde Gastos y la estética actual. Rama `codex/presupuestos-reales`; sin publicación ni conexión de cuentas.
+- Ruling: trabajar en la carpeta actual de misGastos (repositorio anidado) porque el proyecto no estaba en el workspace abierto y la escritura requiere escalación; la rama se creó tras descubrir que el repositorio propio estaba en `main`. No se ha movido ni copiado el proyecto.
+- Baseline antes de cambios: web `npm.cmd test` 51 pasadas, 1 suite sin cargar por `pdfjs-dist` ausente; API `node --test apps/api/*.test.mjs` 8/8. `npm.cmd ci --offline --no-audit --no-fund` restauró 122 paquetes desde caché.
+- Agente modelo: Data v3, migración, cálculos y 9/9 pruebas dirigidas, build correcto. Supervisor detectó tres fallos reproducibles (categoría `constructor`, renombrado a sí misma y partida no recurrente clonada); corrección encargada. Estado de revisión: NO SUPERADA hasta relectura.
+- Agente interfaz: en curso; owns App.tsx y budget-ui. Coordinador actualizó prueba heredada `domain.test.ts` para versión 3. Próximo paso: integrar, ejecutar suite completa y navegador sintético, revisar con supervisor.
+
+## Presupuestos reales — cierre de implementación 2026-10-01
+
+- Implementados en `codex/presupuestos-reales`: datos v3 con migración v1/v2, planes mensuales, ingresos manuales o por partidas (recurrentes o puntuales), gasto previsto, límites por categoría, mensualización de recurrentes, deudas, objetivos de ahorro, histórico con instantánea del ahorro previsto y resumen del gasto real procedente solo de movimientos.
+- Entrada «Mis presupuestos» desde Gastos. En móvil, las cuatro tarjetas del plan se muestran en una matriz 2×2. Recorrido sintético local a 390×844: tarjetas en dos columnas (x=20 y 192) y dos filas (y=276 y 479), sin desbordamiento horizontal.
+- Navegador con datos sintéticos en origen aislado 5178: guardados ingreso manual 1800 €, gasto previsto 700 €, límite Alimentación 250 €, recurrente anual 120 € mostrado como 10 €/mes y deuda de 50 €. Tras reiniciar el servidor, la tarjeta de inicio conservó los 700 € disponibles. La pantalla de objetivos se abrió; el alta con campo de fecha no se completó en el recorrido automatizado por el control de fecha del navegador. El flujo sí tiene pruebas de componente y de modelo.
+- Fallos P1/P2 de la revisión independiente corregidos. El supervisor documentó el cierre y dictamen **REVISIÓN SUPERADA** en `docs/reviews/budgets-2026-10-01.md`; distinguió su verificación del recorrido del coordinador.
+- Verificación final del coordinador: `npm.cmd test` en apps/web **88/88**; `npm.cmd run build` **PASS** (TypeScript, Vite y 5 recursos PWA); `node --test apps/api/*.test.mjs` **8/8**. El supervisor repitió los tres comandos y una reproducción Node del histórico; resultados coincidentes.
+- No se conectaron cuentas, no se publicaron cambios ni se hicieron pagos o movimientos reales. El commit y la subida remota se registran después de esta verificación.
+
+## Integración para subida a Vercel — 2026-10-01
+
+- Commit de presupuestos: `2642124` en `codex/presupuestos-reales`. La rama se integró con `origin/main` en `7067c45`, que contiene la pantalla compacta de gastos del atajo por revisar. Los conflictos de `App.tsx` y `domain.ts` se resolvieron conservando ambos flujos y los campos `pending`/`skipBalance` en datos v3.
+- Prueba nueva de migración: una copia v2 con presupuesto anterior y gasto del atajo pendiente pasa a v3 sin perder `pending`, `skipBalance` ni el importe previsto; también supera un segundo ciclo de copia/restauración.
+- Resultado combinado: `npm.cmd run test:web` **91/91**, `npm.cmd run test:api` **8/8**, `npm.cmd run test:vercel` **10/10** y `npm.cmd run build` **PASS** (TypeScript, Vite y caché PWA). La subida remota y el estado de Vercel se registrarán aparte cuando se verifiquen.
+
+## Subida de presupuestos — 2026-10-01
+
+- Rama `codex/presupuestos-reales` subida a GitHub con commit de integración `49a19bc`; solicitud de cambio [#3](https://github.com/ortizserminio/misGastos/pull/3) abierta contra `main`, estado `CLEAN`.
+- GitHub muestra el check `Vercel` en `SUCCESS` y el comentario de Vercel indica `Ready` para la [vista previa](https://mis-gastos-git-codex-presupuestos-reales-e24developer.vercel.app). La petición HTTP directa desde este entorno agotó el tiempo de conexión; la verificación de disponibilidad se basa en el estado reportado por Vercel/GitHub, no en un recorrido manual de la URL externa.
+- Este despliegue es de vista previa de la rama. Producción requiere fusionar la solicitud con `main`; no se ha hecho esa fusión.
+
+## Aportaciones manuales a inversiones — 2026-10-02
+
+- En «+ → Inversiones» se elige una cuenta de origen, importe y un activo nuevo o existente. La operación se guarda como traspaso vinculado al activo: reduce el saldo de la cuenta y aumenta el invertido, sin entrar en los gastos del mes.
+- Si hay una compra importada con la misma cuenta, activo, fecha e importe, la operación se vincula a ella y no se descuenta dos veces. Al actualizar la valoración de una inversión se registran las aportaciones ya incluidas para no duplicarlas.
+- Borrar una inversión elimina sus aportaciones manuales y desvincula las importadas; cambiar el tipo de una inversión con aportaciones vinculadas se bloquea para evitar inconsistencias. Las copias validan que cada aportación apunte a un activo existente.
+- Las pruebas de modelo y de interfaz cubren alta, aportaciones repetidas, valoración, importación, borrado y bloqueo de conversión de tipo con aportaciones vinculadas. Verificación del coordinador: `npm.cmd test` en apps/web **96/96**; `node --test apps/api/*.test.mjs` **8/8**; `npm.cmd run test:vercel` **10/10**; `npm.cmd run build` **PASS**. Una compilación adicional con URL y clave pública sintéticas confirmó que el flujo se incluye en el bundle cuando la configuración de Supabase está presente. La compilación sin variables solo incluye la pantalla «Falta configuración», como antes.
+- La rama sigue siendo vista previa de la PR #3; esta sección no implica despliegue en producción ni comprobación en Safari/iPhone.

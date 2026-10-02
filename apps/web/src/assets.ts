@@ -1,6 +1,6 @@
 import type {Transaction} from './domain';
 export const assetTypes = ['Cuenta','Efectivo','Ahorro','Inversión','Otro'] as const;
-export type Asset = {id:string;type:typeof assetTypes[number];bank:string;name:string;color:string;notes:string;valuations:{date:string;valueCents:number}[];iban?:string;openingBalance?:{date:string;valueCents:number}};
+export type Asset = {id:string;type:typeof assetTypes[number];bank:string;name:string;color:string;notes:string;valuations:{date:string;valueCents:number;includedInvestmentIds?:string[]}[];iban?:string;openingBalance?:{date:string;valueCents:number}};
 export const cashTypes:readonly string[]=['Cuenta','Efectivo','Ahorro'];
 // Editable display presets, not official bank branding or a banking connection.
 export const banks = [{name:'N26',color:'#174B47'},{name:'BBVA',color:'#123D82'},{name:'Santander',color:'#B91C35'},{name:'CaixaBank',color:'#126887'},{name:'Trade Republic',color:'#252525'},{name:'ING',color:'#A64B08'},{name:'Revolut',color:'#5042A8'},{name:'Otro banco',color:'#1E293B'}];
@@ -8,13 +8,19 @@ export function parseAssetValue(raw:string){const value=raw.trim();if(!/^-?\d{1,
 export function assetValue(asset:Asset){return [...asset.valuations].sort((a,b)=>b.date.localeCompare(a.date))[0]?.valueCents??0;}
 // Expenses still pending review, or marked as not deducted, do not change any balance.
 export function accountDelta(name:string,t:Transaction){if(t.pending||t.skipBalance)return 0;if(t.type==='transfer')return (t.toAccount===name?t.amountCents:0)-(t.bank===name?t.amountCents:0);if(t.bank!==name)return 0;return t.type==='income'?t.amountCents:-t.amountCents;}
-export function accountBalance(asset:Asset,transactions:Transaction[]=[]){const o=asset.openingBalance;if(!o)return assetValue(asset);return transactions.reduce((n,t)=>t.date>=o.date?n+accountDelta(asset.name,t):n,o.valueCents);}
-export function assetSeries(asset:Asset,transactions:Transaction[]=[]){const o=asset.openingBalance;if(!o)return [...asset.valuations].sort((a,b)=>a.date.localeCompare(b.date));const byDate=new Map<string,number>([[o.date,0]]);for(const t of transactions){const d=accountDelta(asset.name,t);if(d&&t.date>=o.date)byDate.set(t.date,(byDate.get(t.date)??0)+d);}let value=o.valueCents;return [...byDate].sort((a,b)=>a[0].localeCompare(b[0])).map(([date,d])=>({date,valueCents:value+=d}));}
+export function accountBalance(asset:Asset,transactions:Transaction[]=[]){if(asset.type==='Inversión')return assetSeries(asset,transactions).at(-1)?.valueCents??0;const o=asset.openingBalance;if(!o)return assetValue(asset);return transactions.reduce((n,t)=>t.date>=o.date?n+accountDelta(asset.name,t):n,o.valueCents);}
+export function assetSeries(asset:Asset,transactions:Transaction[]=[]){
+ if(asset.type==='Inversión'){
+  const contributions=transactions.filter(t=>t.type==='transfer'&&t.investmentAssetId===asset.id&&!t.pending&&!t.skipBalance);
+  const dates=[...new Set([...asset.valuations.map(v=>v.date),...contributions.map(t=>t.date)])].sort();
+  return dates.map(date=>{const valuation=[...asset.valuations].filter(v=>v.date<=date).sort((a,b)=>b.date.localeCompare(a.date))[0];const included=new Set(valuation?.includedInvestmentIds??[]);return {date,valueCents:(valuation?.valueCents??0)+contributions.filter(t=>t.date<=date&&!included.has(t.id)).reduce((n,t)=>n+t.amountCents,0)};});
+ }
+ const o=asset.openingBalance;if(!o)return [...asset.valuations].sort((a,b)=>a.date.localeCompare(b.date));const byDate=new Map<string,number>([[o.date,0]]);for(const t of transactions){const d=accountDelta(asset.name,t);if(d&&t.date>=o.date)byDate.set(t.date,(byDate.get(t.date)??0)+d);}let value=o.valueCents;return [...byDate].sort((a,b)=>a[0].localeCompare(b[0])).map(([date,d])=>({date,valueCents:value+=d}));}
 export function portfolioHistory(assets:Asset[],transactions:Transaction[]=[]){const series=assets.map(a=>assetSeries(a,transactions));const dates=[...new Set(series.flat().map(v=>v.date))].sort();return dates.map(date=>({date,valueCents:series.reduce((sum,s)=>sum+([...s].reverse().find(v=>v.date<=date)?.valueCents??0),0)}));}
 export function validateAssets(value:unknown):Asset[]{
  if(value===undefined)return [];
  const txt=(v:unknown,max:number)=>typeof v==='string'&&v.length<=max;
- const point=(v:any)=>v&&typeof v.date==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(v.date)&&Number.isFinite(Date.parse(v.date))&&new Date(v.date).toISOString().slice(0,10)===v.date&&Number.isSafeInteger(v.valueCents)&&Math.abs(v.valueCents)<=99999999999;
+ const point=(v:any)=>v&&typeof v.date==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(v.date)&&Number.isFinite(Date.parse(v.date))&&new Date(v.date).toISOString().slice(0,10)===v.date&&Number.isSafeInteger(v.valueCents)&&Math.abs(v.valueCents)<=99999999999&&(v.includedInvestmentIds===undefined||Array.isArray(v.includedInvestmentIds)&&v.includedInvestmentIds.length<=5000&&v.includedInvestmentIds.every((id:unknown)=>txt(id,200)&&!!id));
  if(!Array.isArray(value)||value.some(a=>!a||!txt(a.id,200)||!a.id||!assetTypes.includes(a.type)||!txt(a.name,100)||!a.name.trim()||!txt(a.bank,100)||!txt(a.notes,2000)||typeof a.color!=='string'||!/^#[0-9a-f]{6}$/i.test(a.color)||!Array.isArray(a.valuations)||(!a.valuations.length&&!a.openingBalance)||a.valuations.some((v:any)=>!point(v))||(a.openingBalance!==undefined&&!point(a.openingBalance))||(a.iban!==undefined&&(typeof a.iban!=='string'||!/^[A-Z]{2}\d{2}[A-Z0-9]{10,30}$/.test(a.iban)))||new Set(a.valuations.map((v:any)=>v.date)).size!==a.valuations.length)||new Set(value.map(a=>a.id)).size!==value.length)throw Error('Patrimonio no válido en la copia.');
- return value.map(a=>({id:a.id,type:a.type,bank:a.bank,name:a.name,color:a.color,notes:a.notes,valuations:a.valuations.map((v:any)=>({date:v.date,valueCents:v.valueCents})),...(a.iban?{iban:a.iban}:{}),...(a.openingBalance?{openingBalance:{date:a.openingBalance.date,valueCents:a.openingBalance.valueCents}}:{})}));
+ return value.map(a=>({id:a.id,type:a.type,bank:a.bank,name:a.name,color:a.color,notes:a.notes,valuations:a.valuations.map((v:any)=>({date:v.date,valueCents:v.valueCents,...(v.includedInvestmentIds?{includedInvestmentIds:v.includedInvestmentIds}:{})})),...(a.iban?{iban:a.iban}:{}),...(a.openingBalance?{openingBalance:{date:a.openingBalance.date,valueCents:a.openingBalance.valueCents}}:{})}));
 }
