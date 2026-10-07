@@ -187,6 +187,21 @@ describe('personal finance workflow',()=>{
   const saved=cloud.save.mock.calls.at(-1)![0].transactions.find((t:{id:string})=>t.id==='ev9');
   expect(saved).toMatchObject({bank:'BBVA'});expect(saved.pending).toBeUndefined();
  });
+ it('transfers money between two accounts from Patrimonio without counting it as spending',()=>{
+  const acc=(name:string,value:number,color:string)=>({id:name,type:'Cuenta' as const,bank:name,name,color,notes:'',valuations:[],openingBalance:{date:'2026-01-01',valueCents:value}});
+  localStorage.setItem('misgastos.local.v1',JSON.stringify({...emptyData(),accounts:['Efectivo','Trade Republic','BBVA'],assets:[acc('Trade Republic',100000,'#252525'),acc('BBVA',20000,'#123D82')]}));
+  render(<App/>);fireEvent.click(screen.getByRole('button',{name:/Patrimonio/}));
+  fireEvent.click(screen.getByRole('button',{name:/Transferir entre cuentas/}));
+  fireEvent.change(screen.getByLabelText('Importe a traspasar'),{target:{value:'20'}});
+  fireEvent.click(within(screen.getByRole('group',{name:'Cuenta de origen'})).getByRole('button',{name:'Seleccionar cuenta Trade Republic'}));
+  fireEvent.click(within(screen.getByRole('group',{name:'Cuenta de destino'})).getByRole('button',{name:'Seleccionar cuenta BBVA'}));
+  fireEvent.click(screen.getByRole('button',{name:'Guardar transferencia'}));
+  const saved=JSON.parse(localStorage.getItem('misgastos.local.v1')!);
+  expect(saved.transactions[0]).toMatchObject({type:'transfer',amountCents:2000,bank:'Trade Republic',toAccount:'BBVA'});
+  expect(screen.getByText(/980,00/)).toBeTruthy();expect(screen.getByText(/220,00/)).toBeTruthy();
+  fireEvent.click(screen.getByRole('button',{name:'Volver'}));
+  expect(screen.getAllByText(/0,00 €/).length).toBeGreaterThan(0);
+ });
  it('adds and removes categories moving movements to Otros',()=>{
   render(<App/>);fireEvent.click(screen.getByRole('button',{name:'Ajustes'}));
   fireEvent.click(screen.getByRole('button',{name:/Categorías/}));
