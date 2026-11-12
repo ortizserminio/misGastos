@@ -99,3 +99,11 @@
 - Borrar una inversión elimina sus aportaciones manuales y desvincula las importadas; cambiar el tipo de una inversión con aportaciones vinculadas se bloquea para evitar inconsistencias. Las copias validan que cada aportación apunte a un activo existente.
 - Las pruebas de modelo y de interfaz cubren alta, aportaciones repetidas, valoración, importación, borrado y bloqueo de conversión de tipo con aportaciones vinculadas. Verificación del coordinador: `npm.cmd test` en apps/web **96/96**; `node --test apps/api/*.test.mjs` **8/8**; `npm.cmd run test:vercel` **10/10**; `npm.cmd run build` **PASS**. Una compilación adicional con URL y clave pública sintéticas confirmó que el flujo se incluye en el bundle cuando la configuración de Supabase está presente. La compilación sin variables solo incluye la pantalla «Falta configuración», como antes.
 - La rama sigue siendo vista previa de la PR #3; esta sección no implica despliegue en producción ni comprobación en Safari/iPhone.
+## Rediseño visual — Fase 4 (2026-11-12)
+
+- 4.2: colores CSS agrupados en tokens semánticos; eliminado el script de tokenización heredada. Se omitieron las capturas comparativas porque Playwright no está instalado, según la tarea.
+- 4.3: temas Violeta adulto, Cobalto y Pizarra y menta, con persistencia local y comprobación AA mediante scripts/contrast-check.mjs.
+- 4.4: Instrument Sans variable autoalojada, escala tipográfica y cifras tabulares; fuente incluida en la caché PWA.
+- 4.5: saldo principal, sombra de las tarjetas, radios, filas de movimientos y preferencia de movimiento reducido.
+- Para cambiar el tema: Ajustes → Apariencia → elegir uno de los tres. La elección queda guardada en este navegador.
+- Se posponen manifest.webmanifest, index.html, icon.svg y README hasta que Esterly elija el tema definitivo.

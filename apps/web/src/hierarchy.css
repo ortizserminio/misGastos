@@ -1,0 +1,10 @@
+.pat-total>strong,.large .donut-hole strong{font-size:40px;font-weight:600;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+.pat-total p{font-size:13px;font-weight:500;letter-spacing:0;color:var(--color-muted)}
+.wallet-card,.transaction-modal .wallet-card,.account-choice{border-radius:var(--radius-m);box-shadow:var(--shadow-card)}
+.wallet-card.is-selected,.transaction-modal .wallet-card.is-selected{box-shadow:var(--shadow-card)}
+.card,.feature-card,.set-card,.budget-tile{border-radius:var(--radius-m)}
+.modal,.budget-sheet,.pat-sheet{border-radius:var(--radius-l)}
+input,select,.primary,.secondary,.file-button{border-radius:var(--radius-s)}
+.small-pill,.status,.import-chip,.set-badge{border-radius:999px}
+.movement{min-height:56px;padding:9px 0}.movement-info strong{font-size:15px;font-weight:500}.movement-info small{font-size:13px;color:var(--color-muted)}.movement .amount{margin-left:auto;text-align:right;font-size:15px;font-variant-numeric:tabular-nums;letter-spacing:-.01em}.movement .income{color:var(--color-positive)}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
