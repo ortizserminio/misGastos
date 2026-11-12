@@ -9,6 +9,9 @@ export function assetValue(asset:Asset){return [...asset.valuations].sort((a,b)=
 // Expenses still pending review, or marked as not deducted, do not change any balance.
 export function accountDelta(name:string,t:Transaction){if(t.pending||t.skipBalance)return 0;if(t.type==='transfer')return (t.toAccount===name?t.amountCents:0)-(t.bank===name?t.amountCents:0);if(t.bank!==name)return 0;return t.type==='income'?t.amountCents:-t.amountCents;}
 export function accountBalance(asset:Asset,transactions:Transaction[]=[]){if(asset.type==='Inversión')return assetSeries(asset,transactions).at(-1)?.valueCents??0;const o=asset.openingBalance;if(!o)return assetValue(asset);return transactions.reduce((n,t)=>t.date>=o.date?n+accountDelta(asset.name,t):n,o.valueCents);}
+// Net movement of an account from a date (inclusive) onwards. Used to turn a "current balance" typed by the user into the opening balance the model stores.
+export function movementsSince(name:string,date:string,transactions:Transaction[]=[]){return transactions.reduce((n,t)=>t.date>=date?n+accountDelta(name,t):n,0);}
+export function openingFromCurrent(name:string,date:string,currentCents:number,transactions:Transaction[]=[]){return currentCents-movementsSince(name,date,transactions);}
 export function assetSeries(asset:Asset,transactions:Transaction[]=[]){
  if(asset.type==='Inversión'){
   const contributions=transactions.filter(t=>t.type==='transfer'&&t.investmentAssetId===asset.id&&!t.pending&&!t.skipBalance);

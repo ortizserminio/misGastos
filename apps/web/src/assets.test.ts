@@ -6,7 +6,7 @@ it('preserves dated valuations and carries forward each asset at its recorded da
 it('supports zero and negative balances with exact cents',()=>{expect(parseAssetValue('0')).toBe(0);expect(parseAssetValue('-10,05')).toBe(-1005);expect(()=>parseAssetValue('1.000,01')).toThrow();});
 it('migrates old backups and preserves new assets',()=>{expect(validateBackup(JSON.stringify({version:1,transactions:[],accounts:['Efectivo'],budgets:{}})).assets).toEqual([]);const data={...emptyData(),assets:[asset]};expect(validateBackup(JSON.stringify(data))).toEqual(data);});
 it('rejects malformed and duplicate valuation data',()=>{expect(()=>validateAssets([{...asset,valuations:[{date:'2026-02-30',valueCents:2}]}])).toThrow();expect(()=>validateAssets([asset,asset])).toThrow();expect(()=>validateAssets([{...asset,color:'red'}])).toThrow();});
-import {accountBalance,assetSeries} from './assets';
+import {accountBalance,assetSeries,openingFromCurrent} from './assets';
 import type {Transaction} from './domain';
 const tr:Asset={id:'tr',type:'Cuenta',bank:'Trade Republic',name:'Trade Republic',color:'#252525',notes:'',valuations:[],openingBalance:{date:'2026-09-01',valueCents:100000}};
 const n26:Asset={...tr,id:'n26',bank:'N26',name:'N26',openingBalance:{date:'2026-09-01',valueCents:20000}};
@@ -30,4 +30,12 @@ it('does not count a contribution twice after an updated investment valuation',(
  expect(accountBalance(fund,[first])).toBe(12000);
  expect(validateBackup(JSON.stringify({...emptyData(),transactions:[first],assets:[fund]})).assets).toEqual([fund]);
  expect(()=>validateBackup(JSON.stringify({...emptyData(),transactions:[first],assets:[]}))).toThrow();
+});
+
+it('editing with the current balance shows exactly that balance',()=>{
+ const list=[move({amountCents:15000}),move({amountCents:5000}),move({type:'income',amountCents:0})];
+ const before=accountBalance(n26,list);
+ const edited:Asset={...n26,openingBalance:{date:n26.openingBalance!.date,valueCents:openingFromCurrent(n26.name,n26.openingBalance!.date,400000,list)}};
+ expect(before).toBe(0);
+ expect(accountBalance(edited,list)).toBe(400000);
 });
