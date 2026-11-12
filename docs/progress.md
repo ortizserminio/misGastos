@@ -115,3 +115,5 @@
 
 - Se redujeron la cabecera, el selector de mes, el donut y los espacios entre tarjetas solo en el inicio móvil. Entradas, presupuestos y patrimonio ocupan filas más compactas, conservando los textos del JSX y áreas táctiles de al menos 44 px.
 - `scripts/home-height.mjs` estima la altura de cabecera a Patrimonio frente al viewport de 390 × 844 y la barra inferior, con y sin «Gastos por revisar». La posición real y los saltos de línea aún deben confirmarse en un iPhone instalado a pantalla completa.
+
+- Ajuste posterior: cabecera y tarjetas más amplias, texto secundario de Entradas visible y donut adaptable a `100dvh` con respaldo `100vh`. El cálculo de altura comprueba 390 × 844 y 390 × 750, dejando Patrimonio entre 4 y 24 px sobre el menú, salvo cuando el donut alcanza su mínimo de 180 px. La posición real sigue pendiente de comprobación en Safari/iPhone.
