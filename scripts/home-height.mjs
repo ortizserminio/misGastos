@@ -1,32 +1,27 @@
 import {readFileSync} from 'node:fs';
 
 const css=readFileSync(new URL('../apps/web/src/home-compact.css',import.meta.url),'utf8');
-const expected=['height:72px','height:48px','min-height:84px','min-height:72px','gap:10px','clamp(180px, calc(100vh - 561px','clamp(180px, calc(100dvh - 561px','width:var(--home-donut)','height:var(--home-donut)'];
-for(const declaration of expected){
-  if(!css.includes(declaration))throw new Error(`Falta la medida CSS: ${declaration}`);
-}
-
-const parts={
-  cabecera:72,
-  margenCabecera:8,
-  selectorMes:48,
-  margenSelector:10,
-  donutTarjetaSinDonut:14+22+20+1+20+16,
-  margenDonut:10,
-  entradas:84,
-  huecosTarjetas:20,
-  presupuestos:72,
-  patrimonio:72,
-};
-const fixed=Object.values(parts).reduce((sum,value)=>sum+value,0);
-if(fixed!==489)throw new Error(`El desglose fijo cambió: ${fixed}px`);
+const base=readFileSync(new URL('../apps/web/src/styles.css',import.meta.url),'utf8');
+const declaration=(source,pattern,name)=>{const match=source.match(pattern);if(!match)throw new Error(`Falta la medida CSS: ${name}`);return Number(match[1]);};
+const fixedExpression=css.match(/--home-fixed:calc\(([^)]+)\)/)?.[1];
+if(!fixedExpression)throw new Error('Falta --home-fixed');
+const fixedParts=[...fixedExpression.matchAll(/(\d+)px/g)].map(m=>Number(m[1]));
+const fixed=fixedParts.reduce((sum,value)=>sum+value,0);
+const row=declaration(css,/\.income-card,\s*\n\s*\.home-month-selector ~ \.overview-grid \.feature-card \{ height:(\d+)px/,'altura de filas');
+if(fixedParts.filter(value=>value===row).length!==3)throw new Error('Las tres filas deben formar parte de --home-fixed');
+const navBorder=declaration(base,/\.bottom-nav\{[^}]*?border:(\d+)px solid/,'borde del menú');
+const navPadding=declaration(base,/\.bottom-nav\{bottom:0;[^}]*?padding:(\d+)px/,'padding del menú');
+const navItem=declaration(base,/\.nav-item\{[^}]*?min-height:(\d+)px/,'alto de elemento del menú');
+const navSafe=declaration(base,/\.bottom-nav\{bottom:0;[^}]*?max\((\d+)px,env\(safe-area-inset-bottom\)\)/,'reserva segura del menú');
+const nav=navBorder+navPadding+navItem+navSafe;
+const declaredNav=css.match(/--home-nav:calc\(([^)]+)\)/)?.[1];
+if(!declaredNav||[...declaredNav.matchAll(/(\d+)px/g)].reduce((sum,m)=>sum+Number(m[1]),0)!==nav)throw new Error('--home-nav no coincide con styles.css');
+if(!css.includes('100vh - var(--home-fixed) - var(--home-nav) - 12px')||!css.includes('100dvh - var(--home-fixed) - var(--home-nav) - 12px'))throw new Error('La fórmula del donut no usa las alturas CSS');
 for(const viewport of [844,750]){
-  const safeTop=0;
-  const safeBottom=0;
-  const nav=1+10+49+Math.max(12,safeBottom);
-  const donut=Math.max(180,Math.min(280,viewport-561-Math.max(12,safeBottom)-safeTop));
-  const gap=viewport-nav-safeTop-fixed-donut;
-  console.log(`390×${viewport}: ${Object.entries(parts).map(([name,value])=>`${name} ${value}`).join(' + ')} = ${fixed}px; donut ${donut}px; menú ${nav}px; aire ${gap}px`);
-  if(donut>180 && (gap<4 || gap>24))throw new Error(`Patrimonio queda a ${gap}px del menú en 390×${viewport}`);
-  if(donut===180 && gap>24)throw new Error(`Queda demasiado aire con el donut mínimo en 390×${viewport}`);
+  const ideal=viewport-fixed-nav-12;
+  const donut=Math.max(190,Math.min(300,ideal));
+  const gap=viewport-fixed-nav-donut;
+  console.log(`390×${viewport}: fijo ${fixed}px; donut ${donut}px; menú ${nav}px; aire ${gap}px`);
+  if(ideal>=190&&(gap<4||gap>24))throw new Error(`Patrimonio queda a ${gap}px del menú en 390×${viewport}`);
+  if(ideal<190&&gap>24)throw new Error(`Queda demasiado aire con el donut mínimo en 390×${viewport}`);
 }
