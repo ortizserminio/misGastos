@@ -7,3 +7,4 @@
 .transaction-modal input[type=date]{height:46px;min-height:46px;min-width:0;width:100%;padding:10px 12px;font-size:16px}
 @media(max-width:600px){.transaction-modal .transaction-layout{padding-left:16px;padding-right:16px}.transaction-modal .modal-body{padding-top:16px}.transaction-modal .amount-label input{font-size:40px}}
 .transaction-modal .transfer-title{flex:1;margin:0 0 0 12px;font-size:20px}
+.transaction-modal .wallet-card,.transaction-modal .wallet-card.is-selected{border-radius:var(--radius-m);box-shadow:var(--shadow-card)}
