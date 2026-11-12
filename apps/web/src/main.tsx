@@ -1,6 +1,7 @@
 import React from 'react';
 import {createRoot} from 'react-dom/client';
 import Root from './cloud/Root';
+import '@fontsource-variable/instrument-sans';
 import './tokens.css';
 import './styles.css';
 try{const theme=localStorage.getItem('misgastos-theme');document.documentElement.dataset.theme=theme&&['violeta','cobalto','menta'].includes(theme)?theme:'violeta';}catch{document.documentElement.dataset.theme='violeta';}

@@ -1,4 +1,4 @@
-.import-pad{padding:6px 20px 20px}.import-pad h2{margin:18px 0 8px}.import-pad .file-button{display:inline-flex;justify-content:center;align-items:center;gap:8px;padding:14px 18px;border-radius:14px;width:100%;flex-direction:row;color:white;background:var(--purple);border:0;font-size:15px}.import-pad .file-button input{display:none}
+﻿.import-pad{padding:6px 20px 20px}.import-pad h2{margin:18px 0 8px}.import-pad .file-button{display:inline-flex;justify-content:center;align-items:center;gap:8px;padding:14px 18px;border-radius:14px;width:100%;flex-direction:row;color:white;background:var(--purple);border:0;font-size:15px}.import-pad .file-button input{display:none}
 .wide{width:100%;min-height:52px;border-radius:14px;font-weight:600}
 .import-two{display:grid;grid-template-columns:1fr 1fr;gap:12px}.import-two label{margin:8px 0}
 .import-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:16px 20px}.import-summary strong{display:block;font-size:18px}
