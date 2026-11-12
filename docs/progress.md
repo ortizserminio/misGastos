@@ -117,3 +117,9 @@
 - `scripts/home-height.mjs` estima la altura de cabecera a Patrimonio frente al viewport de 390 × 844 y la barra inferior, con y sin «Gastos por revisar». La posición real y los saltos de línea aún deben confirmarse en un iPhone instalado a pantalla completa.
 
 - Ajuste posterior: cabecera y tarjetas más amplias, texto secundario de Entradas visible y donut adaptable a `100dvh` con respaldo `100vh`. El cálculo de altura comprueba 390 × 844 y 390 × 750, dejando Patrimonio entre 4 y 24 px sobre el menú, salvo cuando el donut alcanza su mínimo de 180 px. La posición real sigue pendiente de comprobación en Safari/iPhone.
+
+## Ajustes de inicio y fechas en iPhone — 2026-11-12
+
+- Las filas de Entradas, Mis presupuestos y Patrimonio miden 88 px, con iconos de 44 px, textos más grandes y truncamiento. El donut usa las alturas declaradas en CSS y `scripts/home-height.mjs` las lee para comprobar 390 × 844 y 390 × 750. En 750 px el donut alcanza el mínimo y el contenido necesita desplazamiento vertical.
+- El editor de activos y la importación usan `DateField`; las hojas y modales limitan el desplazamiento horizontal. Se añadió una prueba de edición y guardado de la fecha de una Cuenta.
+- Falta confirmar el resultado visual y el desplazamiento vertical en el iPhone instalado.

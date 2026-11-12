@@ -4,10 +4,23 @@ import {beforeEach,describe,it,expect,vi} from 'vitest';
 import {render,screen,fireEvent,cleanup,within} from '@testing-library/react';
 import App from './App';
 import {emptyData,today,summary} from './domain';
-import {accountBalance} from './assets';
+import {accountBalance,banks} from './assets';
 
 beforeEach(()=>{cleanup();localStorage.clear();HTMLDialogElement.prototype.showModal=function(){this.setAttribute('open','');};vi.stubGlobal('confirm',()=>true);});
 describe('personal finance workflow',()=>{
+ it('edits a cash account date through DateField and saves it',()=>{
+  const account={id:'cash',type:'Cuenta' as const,bank:'N26',name:'Cuenta N26',color:banks[0].color,notes:'',valuations:[],openingBalance:{date:'2026-01-01',valueCents:10000}};
+  localStorage.setItem('misgastos.local.v1',JSON.stringify({...emptyData(),accounts:['Cuenta N26'],assets:[account]}));
+  render(<App/>);
+  fireEvent.click(screen.getByRole('button',{name:/Patrimonio/}));
+  fireEvent.click(screen.getByRole('button',{name:'Editar Cuenta N26'}));
+  const date=screen.getByLabelText('Contar movimientos desde') as HTMLInputElement;
+  expect(date.closest('.compact-date-field')).toBeTruthy();
+  fireEvent.change(date,{target:{value:'2026-02-01'}});
+  fireEvent.click(screen.getByRole('button',{name:'Guardar activo'}));
+  const saved=JSON.parse(localStorage.getItem('misgastos.local.v1')!);
+  expect(saved.assets[0].openingBalance.date).toBe('2026-02-01');
+ });
  it('prevents changing a funded investment into a cash account',()=>{
   const tr={id:'trade',type:'Cuenta' as const,bank:'Trade Republic',name:'Trade Republic',color:'#252525',notes:'',valuations:[],openingBalance:{date:'2026-01-01',valueCents:100000}};
   const fund={id:'fund',type:'Inversión' as const,bank:'Trade Republic',name:'Fondo indexado',color:'#252525',notes:'',valuations:[{date:today(),valueCents:0}]};
