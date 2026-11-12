@@ -5,6 +5,7 @@ import '@fontsource-variable/instrument-sans';
 import './tokens.css';
 import './styles.css';
 import './hierarchy.css';
+import './home-compact.css';
 import {applyTheme} from './theme';
 try{applyTheme(localStorage.getItem('misgastos-theme'));}catch{applyTheme('violeta');}
 createRoot(document.getElementById('root')!).render(<React.StrictMode><Root/></React.StrictMode>);

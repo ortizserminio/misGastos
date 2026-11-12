@@ -110,3 +110,8 @@
 
 - Los tres temas quedan permanentes en Ajustes → Apariencia; la pantalla de carga, el color del sistema y la gráfica de Patrimonio siguen el tema elegido.
 - Se separaron los bordes decorativos de los bordes de controles para conservar el contraste de los elementos interactivos.
+
+## Inicio compacto en móvil — 2026-11-12
+
+- Se redujeron la cabecera, el selector de mes, el donut y los espacios entre tarjetas solo en el inicio móvil. Entradas, presupuestos y patrimonio ocupan filas más compactas, conservando los textos del JSX y áreas táctiles de al menos 44 px.
+- `scripts/home-height.mjs` estima la altura de cabecera a Patrimonio frente al viewport de 390 × 844 y la barra inferior, con y sin «Gastos por revisar». La posición real y los saltos de línea aún deben confirmarse en un iPhone instalado a pantalla completa.
