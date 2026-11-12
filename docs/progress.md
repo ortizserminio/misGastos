@@ -106,4 +106,7 @@
 - 4.4: Instrument Sans variable autoalojada, escala tipográfica y cifras tabulares; fuente incluida en la caché PWA.
 - 4.5: saldo principal, sombra de las tarjetas, radios, filas de movimientos y preferencia de movimiento reducido.
 - Para cambiar el tema: Ajustes → Apariencia → elegir uno de los tres. La elección queda guardada en este navegador.
-- Se posponen manifest.webmanifest, index.html, icon.svg y README hasta que Esterly elija el tema definitivo.
+- Violeta adulto es el tema por defecto; manifest.webmanifest, index.html, icon.svg y README reflejan los tres temas permanentes.
+
+- Los tres temas quedan permanentes en Ajustes → Apariencia; la pantalla de carga, el color del sistema y la gráfica de Patrimonio siguen el tema elegido.
+- Se separaron los bordes decorativos de los bordes de controles para conservar el contraste de los elementos interactivos.

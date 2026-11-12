@@ -1,6 +1,6 @@
 # misGastos
 
-Aplicación personal de finanzas en React y TypeScript, con diseño morado y receptor opcional para Atajos de iPhone. Sin módulo de repostajes.
+Aplicación personal de finanzas en React y TypeScript, con tres temas de color a elegir (Violeta adulto, Cobalto y Pizarra y menta) y receptor opcional para Atajos de iPhone. Sin módulo de repostajes.
 
 ## Desarrollo local
 

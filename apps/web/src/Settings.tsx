@@ -2,13 +2,14 @@ import {useRef,useState} from 'react';
 import {Camera,Pencil,Check,ChevronRight,Banknote,Landmark,LayoutGrid,Zap,UploadCloud,UserRound,Info,Download,Upload,Trash2,Mail,Store,type LucideIcon} from 'lucide-react';
 import {type Data,validateBackup,download,emptyData} from './domain';
 import './settings.css';
+import {applyTheme} from './theme';
 type Props={data:Data;onChange:(d:Data,restore?:boolean)=>void;onShortcut:()=>void;onPatrimonio:()=>void;onCategories:()=>void;onMerchants:()=>void;onImport:()=>void;account?:{email:string;onLogout:()=>void}};
 function Row({icon:Icon,label,value,onClick,accent}:{icon:LucideIcon;label:string;value?:string;onClick?:()=>void;accent?:boolean}){const body=<><span className={`set-icon${accent?' accent':''}`}><Icon size={22}/></span><span className="set-label">{label}</span>{value&&<span className="set-value">{value}</span>}{onClick&&<ChevronRight className="set-chevron" size={20}/>}</>;return onClick?<button className="set-row" onClick={onClick}>{body}</button>:<div className="set-row">{body}</div>;}
 function resizeImage(file:File):Promise<string>{return new Promise((resolve,reject)=>{const img=new Image(),url=URL.createObjectURL(file);img.onload=()=>{const c=document.createElement('canvas'),s=Math.min(img.width,img.height);c.width=c.height=256;c.getContext('2d')!.drawImage(img,(img.width-s)/2,(img.height-s)/2,s,s,0,0,256,256);URL.revokeObjectURL(url);resolve(c.toDataURL('image/jpeg',.85));};img.onerror=()=>{URL.revokeObjectURL(url);reject(Error('No se ha podido leer la imagen.'));};img.src=url;});}
 export default function Settings({data,onChange,onShortcut,onPatrimonio,onCategories,onMerchants,onImport,account}:Props){
  const [editing,setEditing]=useState<''|'name'|'owner'>(''),[draft,setDraft]=useState(''),[error,setError]=useState(''),restore=useRef<HTMLInputElement>(null);
  const [theme,setTheme]=useState(document.documentElement.dataset.theme||'violeta');
- const chooseTheme=(value:string)=>{document.documentElement.dataset.theme=value;setTheme(value);try{localStorage.setItem('misgastos-theme',value);}catch{}};
+ const chooseTheme=(value:string)=>{setTheme(applyTheme(value));try{localStorage.setItem('misgastos-theme',value);}catch{}};
  const profile=data.profile,initials=(profile.displayName||'mis Gastos').split(/\s+/).map(w=>w[0]).join('').slice(0,2).toUpperCase();
  const saveProfile=(p:Partial<Data['profile']>)=>onChange({...data,profile:{...profile,...p}});
  const start=(field:'name'|'owner')=>{setDraft(field==='name'?profile.displayName:profile.ownerName);setEditing(field);setError('');};
