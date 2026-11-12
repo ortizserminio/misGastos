@@ -3,6 +3,7 @@ import {createRoot} from 'react-dom/client';
 import Root from './cloud/Root';
 import './tokens.css';
 import './styles.css';
+try{const theme=localStorage.getItem('misgastos-theme');document.documentElement.dataset.theme=theme&&['violeta','cobalto','menta'].includes(theme)?theme:'violeta';}catch{document.documentElement.dataset.theme='violeta';}
 createRoot(document.getElementById('root')!).render(<React.StrictMode><Root/></React.StrictMode>);
 // iOS Safari ignores user-scalable=no; blocking its gesture events keeps pinch zoom off.
 for(const type of ['gesturestart','gesturechange','gestureend'])document.addEventListener(type,e=>e.preventDefault(),{passive:false});

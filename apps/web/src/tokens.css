@@ -1,4 +1,4 @@
-:root{
+﻿:root{
  --color-bg:#f7f8fb;
  --color-surface:#ffffff;
  --color-surface-2:#f5f4f7;
@@ -49,4 +49,10 @@
  --color-warning-ink:#70544c;
  --color-positive-soft:#e8f5ef;
  --color-negative-soft:#fff0f2;
+ --color-theme-violet:#5b45c2;
+ --color-theme-cobalt:#2546c7;
+ --color-theme-mint:#0f6e66;
 }
+[data-theme="violeta"]{--color-primary:#5b45c2;--color-primary-strong:#3f2e96;--color-primary-light:#5b45c2;--color-primary-soft:#ece8fa;--color-primary-tint:#f3f1fb;--color-primary-glow:#5b45c220;--color-ink:#1e1b2e;--color-ink-2:#494557;--color-muted:#5d586b;--color-bg:#f7f7fa;--color-surface:#ffffff;--color-surface-2:#f2f2f6;--color-border:#8e879a;--color-positive:#0e7c5a;--color-negative:#c2413a;--color-savings:#805600;--color-savings-border:#aa7600;--color-savings-soft:#fff4d6;--color-card-dark-1:#3f2e60;--color-card-dark-2:#252039}
+[data-theme="cobalto"]{--color-primary:#2546c7;--color-primary-strong:#18308f;--color-primary-light:#2546c7;--color-primary-soft:#e6ecfb;--color-primary-tint:#f0f3fc;--color-primary-glow:#2546c720;--color-ink:#141a2a;--color-ink-2:#3f485a;--color-muted:#566174;--color-bg:#f4f6f9;--color-surface:#ffffff;--color-surface-2:#eef1f6;--color-border:#8896aa;--color-positive:#11795b;--color-negative:#c23b3b;--color-savings:#805600;--color-savings-border:#aa7600;--color-savings-soft:#fff4d6;--color-card-dark-1:#273c6b;--color-card-dark-2:#18243e}
+[data-theme="menta"]{--color-primary:#0f6e66;--color-primary-strong:#0a4f4a;--color-primary-light:#0f6e66;--color-primary-soft:#e3f2ef;--color-primary-tint:#f0f8f6;--color-primary-glow:#0f6e6620;--color-ink:#1b2528;--color-ink-2:#3e5558;--color-muted:#536568;--color-bg:#f5f7f6;--color-surface:#ffffff;--color-surface-2:#eef3f1;--color-border:#7e9890;--color-positive:#0f6e66;--color-negative:#b8433a;--color-savings:#805600;--color-savings-border:#aa7600;--color-savings-soft:#fff4d6;--color-transfer:#5a64d6;--color-card-dark-1:#244d4c;--color-card-dark-2:#182f32}
