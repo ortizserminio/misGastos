@@ -1,5 +1,5 @@
-const CACHE='misgastos-v1';
-const PRECACHE=['/','/icon.svg','/manifest.webmanifest'];
+const CACHE='misgastos-v2';
+const PRECACHE=['/','/icon.svg','/icon-maskable.svg','/apple-touch-icon.png','/icon-192.png','/icon-512.png','/icon-maskable-512.png','/manifest.webmanifest'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(PRECACHE))));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith('misgastos-')&&key!==CACHE).map(key=>caches.delete(key))))));
 self.addEventListener('fetch',event=>{

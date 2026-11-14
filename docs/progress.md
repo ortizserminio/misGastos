@@ -140,3 +140,8 @@
 - Se reutilizan los controles segmentados y el patrón de regreso existentes; las filas por origen muestran fecha y categoría en lugar de repetir el origen.
 - Se eliminó el zoom móvil global y se ajustaron los tamaños base y las zonas táctiles. El cálculo de portada da 12 px de aire a 390 × 844; a 390 × 750 requiere desplazamiento vertical.
 - Pasaron `npm run test:web` (111 pruebas), `npm run test:vercel` (10), compilación web, contraste, altura y detector Impeccable (0 hallazgos en código fuente).
+
+## Icono de inicio en iPhone — 2026-11-15
+
+- El monedero blanco sobre Violeta adulto sustituye la M en los iconos SVG y PNG de la app. El PNG de Apple tiene fondo cuadrado completo para que iOS aplique sus propias esquinas.
+- Para ver el icono nuevo en el iPhone, hay que borrar el acceso de la pantalla de inicio y volver a añadirlo desde Safari; iOS guarda el icono antiguo.
