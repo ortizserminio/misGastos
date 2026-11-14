@@ -123,3 +123,8 @@
 - Las filas de Entradas, Mis presupuestos y Patrimonio miden 88 px, con iconos de 44 px, textos más grandes y truncamiento. El donut usa las alturas declaradas en CSS y `scripts/home-height.mjs` las lee para comprobar 390 × 844 y 390 × 750. En 750 px el donut alcanza el mínimo y el contenido necesita desplazamiento vertical.
 - El editor de activos y la importación usan `DateField`; las hojas y modales limitan el desplazamiento horizontal. Se añadió una prueba de edición y guardado de la fecha de una Cuenta.
 - Falta confirmar el resultado visual y el desplazamiento vertical en el iPhone instalado.
+
+## Desglose de entradas — 2026-11-14
+
+- La tarjeta «Entradas del mes» abre una pantalla con el mismo total mensual, agrupado por origen o cuenta. Los orígenes se unifican sin distinguir acentos, mayúsculas ni espacios y usan las reglas de nombres de comercio.
+- Cada grupo muestra importe, número de entradas y proporción; se pueden desplegar sus movimientos para editarlos o eliminarlos. El estado vacío permite abrir un nuevo ingreso.

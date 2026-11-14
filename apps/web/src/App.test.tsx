@@ -8,6 +8,24 @@ import {accountBalance,banks} from './assets';
 
 beforeEach(()=>{cleanup();localStorage.clear();HTMLDialogElement.prototype.showModal=function(){this.setAttribute('open','');};vi.stubGlobal('confirm',()=>true);});
 describe('personal finance workflow',()=>{
+ it('opens monthly income origins with the same total as the home card',()=>{
+  const month=today().slice(0,7);
+  const transactions=[
+   {id:'salary',type:'income' as const,amountCents:12345,merchant:'Nómina',bank:'N26',category:'Otros',date:`${month}-05`,source:'manual' as const},
+   {id:'gift',type:'income' as const,amountCents:6789,merchant:'Regalo',bank:'BBVA',category:'Otros',date:`${month}-08`,source:'manual' as const}
+  ];
+  localStorage.setItem('misgastos.local.v1',JSON.stringify({...emptyData(),transactions}));
+  render(<App/>);
+  const card=screen.getByRole('button',{name:'Ver de dónde vienen tus entradas del mes'});
+  expect(card.textContent).toContain('+191,34');
+  fireEvent.click(card);
+  expect(screen.getByRole('heading',{name:'Entradas'})).toBeTruthy();
+  expect(screen.getByText('Nómina')).toBeTruthy();
+  expect(screen.getByText('Regalo')).toBeTruthy();
+  expect(screen.getByText(/\+191,34\s€/)).toBeTruthy();
+  expect(screen.getByText(/\+123,45\s€/)).toBeTruthy();
+  expect(screen.getByText(/\+67,89\s€/)).toBeTruthy();
+ });
  it('edits a cash account date through DateField and saves it',()=>{
   const account={id:'cash',type:'Cuenta' as const,bank:'N26',name:'Cuenta N26',color:banks[0].color,notes:'',valuations:[],openingBalance:{date:'2026-01-01',valueCents:10000}};
   localStorage.setItem('misgastos.local.v1',JSON.stringify({...emptyData(),accounts:['Cuenta N26'],assets:[account]}));
