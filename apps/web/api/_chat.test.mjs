@@ -49,6 +49,17 @@ test('comparar_meses and saldos_cuentas follow the app rules (pending does not m
   assert.deepEqual(saldosCuentas(data).cuentas[0].saldo, 2447.5); // 1000 + 1500 - 12.50 - 40 (pending 20 not deducted)
 });
 
+test('saldos_cuentas values investments like Patrimonio: latest valuation plus contributions it does not include', () => {
+  const fund = { id: 'fondo', type: 'Inversión', bank: 'MyInvestor', name: 'Fondo', color: '#000000', notes: '', valuations: [{ date: '2026-10-01', valueCents: 100000, includedInvestmentIds: ['old'] }] };
+  const withFund = { ...data, assets: [...data.assets, fund], transactions: [...data.transactions,
+    tx('old', 'transfer', 50000, 'Aportación', 'Transferencia', '2026-09-15', { investmentAssetId: 'fondo', toAccount: 'Fondo' }),
+    tx('new', 'transfer', 20000, 'Aportación', 'Transferencia', '2026-11-04', { investmentAssetId: 'fondo', toAccount: 'Fondo' }),
+    tx('skip', 'transfer', 9900, 'Aportación', 'Transferencia', '2026-11-06', { investmentAssetId: 'fondo', toAccount: 'Fondo', pending: true }),
+  ] };
+  const fondo = saldosCuentas(withFund).cuentas.find(c => c.nombre === 'Fondo');
+  assert.equal(fondo.saldo, 1200); // 1000 valued + 200 new contribution; "old" already included, pending ignored
+});
+
 test('runTool rejects unknown tools and bad JSON without throwing', () => {
   assert.match(runTool('borrar_todo', '{}', data, today).error, /desconocida/);
   assert.match(runTool('resumen_periodo', '{no json', data, today).error, /JSON/);

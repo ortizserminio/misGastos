@@ -46,10 +46,17 @@ export function compararMeses(data, args, today) {
 
 // Same rule as accountBalance() in src/assets.ts: pending or skipBalance movements do not change any balance.
 function delta(name, t) { if (t.pending || t.skipBalance) return 0; if (t.type === 'transfer') return (t.toAccount === name ? t.amountCents : 0) - (t.bank === name ? t.amountCents : 0); if (t.bank !== name) return 0; return t.type === 'income' ? t.amountCents : -t.amountCents; }
-const latest = a => [...(a.valuations ?? [])].sort((x, y) => x.date.localeCompare(y.date)).at(-1)?.valueCents ?? 0;
+const latestValuation = a => [...(a.valuations ?? [])].sort((x, y) => x.date.localeCompare(y.date)).at(-1);
+// Same rule as the last point of assetSeries() in src/assets.ts: the latest valuation plus every
+// linked contribution (transfer with investmentAssetId) that valuation does not already include.
+function investmentValue(a, data) {
+  const valuation = latestValuation(a), included = new Set(valuation?.includedInvestmentIds ?? []);
+  const contributions = txs(data).filter(t => t.type === 'transfer' && t.investmentAssetId === a.id && !t.pending && !t.skipBalance && !included.has(t.id));
+  return (valuation?.valueCents ?? 0) + sum(contributions);
+}
 export function saldosCuentas(data) {
   const assets = Array.isArray(data?.assets) ? data.assets : [];
-  const cuentas = assets.map(a => { const o = a.openingBalance; const cents = o && a.type !== 'Inversión' ? txs(data).reduce((n, t) => t.date >= o.date ? n + delta(a.name, t) : n, o.valueCents) : latest(a); return { nombre: clean(a.name, 60), tipo: a.type, banco: clean(a.bank, 40), saldo: euros(cents), ...(a.type === 'Inversión' ? { nota: 'última valoración registrada' } : {}) }; });
+  const cuentas = assets.map(a => { const o = a.openingBalance; const cents = a.type === 'Inversión' ? investmentValue(a, data) : o ? txs(data).reduce((n, t) => t.date >= o.date ? n + delta(a.name, t) : n, o.valueCents) : (latestValuation(a)?.valueCents ?? 0); return { nombre: clean(a.name, 60), tipo: a.type, banco: clean(a.bank, 40), saldo: euros(cents), ...(a.type === 'Inversión' ? { nota: 'última valoración más las aportaciones posteriores' } : {}) }; });
   return { cuentas, total: Math.round(cuentas.reduce((n, c) => n + c.saldo * 100, 0)) / 100 };
 }
 
