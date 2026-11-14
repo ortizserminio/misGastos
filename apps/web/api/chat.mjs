@@ -56,8 +56,11 @@ async function bump(userId, day) {
 
 export async function answer(history, data, today) {
   const messages = [{ role: 'system', content: `${SYSTEM}\n\n${context(data, today)}` }, ...history];
+  let model;
   for (let round = 0; round < MAX_ROUNDS; round++) {
-    const message = await complete({ messages, tools });
+    const result = await complete({ messages, tools, model });
+    const message = result.message;
+    model = result.model;
     const calls = Array.isArray(message.tool_calls) ? message.tool_calls : [];
     if (!calls.length) return typeof message.content === 'string' && message.content.trim() ? message.content.trim() : 'No he sabido responder a eso. ¿Puedes preguntarlo de otra forma?';
     messages.push(message);

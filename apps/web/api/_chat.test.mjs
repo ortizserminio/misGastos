@@ -133,6 +133,30 @@ test('chat reports 503 when no AI key is configured and maps provider 429', asyn
   assert.equal(res.statusCode, 429); assert.equal(res.body.error, 'ai_rate_limited');
 });
 
+test('a busy free model (503) is retried once, then the fallback model answers', async () => {
+  process.env.AI_API_KEY = 'ai-key'; process.env.AI_BASE_URL = AI; process.env.AI_MODEL = 'principal'; process.env.AI_FALLBACK_MODEL = 'ligero';
+  const busy = { status: 503, body: { error: { message: 'The model is overloaded.' } } };
+  let calls = mockFetch({ aiReplies: [busy, { role: 'assistant', content: 'Bien.' }] });
+  assert.equal(await answer([{ role: 'user', content: 'hola' }], data, today), 'Bien.');
+  assert.deepEqual(calls.filter(c => c.url.startsWith(AI)).map(c => c.body.model), ['principal', 'principal']);
+  calls = mockFetch({ aiReplies: [busy, busy, { role: 'assistant', content: 'Desde el ligero.' }] });
+  assert.equal(await answer([{ role: 'user', content: 'hola' }], data, today), 'Desde el ligero.');
+  assert.deepEqual(calls.filter(c => c.url.startsWith(AI)).map(c => c.body.model), ['principal', 'principal', 'ligero']);
+  mockFetch({ aiReplies: [busy, busy, busy, busy] }); const res = response();
+  await chat(request({ messages: [{ role: 'user', content: 'hola' }] }), res);
+  assert.equal(res.statusCode, 503); assert.equal(res.body.error, 'ai_busy');
+  delete process.env.AI_FALLBACK_MODEL; process.env.AI_MODEL = 'modelo-demo';
+});
+
+test('once a model answers, the rest of the tool loop stays on it (thought signatures are per model)', async () => {
+  process.env.AI_API_KEY = 'ai-key'; process.env.AI_BASE_URL = AI; process.env.AI_MODEL = 'principal'; process.env.AI_FALLBACK_MODEL = 'ligero';
+  const toolCall = { role: 'assistant', content: null, tool_calls: [{ id: 'c1', type: 'function', function: { name: 'saldos_cuentas', arguments: '{}' } }] };
+  const calls = mockFetch({ aiReplies: [{ status: 404, body: { error: { message: 'not found' } } }, toolCall, { role: 'assistant', content: 'Listo.' }] });
+  assert.equal(await answer([{ role: 'user', content: 'saldos' }], data, today), 'Listo.');
+  assert.deepEqual(calls.filter(c => c.url.startsWith(AI)).map(c => c.body.model), ['principal', 'ligero', 'ligero']);
+  delete process.env.AI_FALLBACK_MODEL; process.env.AI_MODEL = 'modelo-demo';
+});
+
 test('answer stops after too many tool rounds', async () => {
   process.env.AI_API_KEY = 'ai-key'; process.env.AI_BASE_URL = AI;
   const loop = { role: 'assistant', content: null, tool_calls: [{ id: 'x', type: 'function', function: { name: 'saldos_cuentas', arguments: '{}' } }] };
