@@ -32,3 +32,5 @@ button.card{width:100%;text-align:left;color:inherit;font:inherit}.income-card>d
 /* The viewport is now rendered at its actual CSS size on phones. */
 @media(max-width:760px){.app-shell{padding-inline:16px}.app-header:not(:has(+ main .home-month-selector)){height:72px;margin-bottom:18px}.card{padding:18px}.page-heading{margin-bottom:20px}.heading-row .month-selector{margin-top:14px}.bottom-nav{padding-top:10px}.nav-item{font-size:12px;min-height:49px}.hero-footer,.small-pill,.status,.demo-button,.calendar>small,.calendar button,.calendar button strong,.category-breakdown small,.budget-stats small,.trend span,.trend small,.bank-card span,.bank-card small,.app-footer{font-size:12px}.calendar button{min-height:55px}.toast button,.month-selector>button{min-width:44px;min-height:44px}.movement .compact{min-width:44px;min-height:44px}}
 @media(min-width:761px){.icon-button.compact{min-width:44px;min-height:44px}}
+
+.calendar button.has-expense{background:color-mix(in srgb,var(--color-primary) var(--heat),var(--color-surface));color:var(--color-ink)}
