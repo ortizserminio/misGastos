@@ -1,5 +1,9 @@
 # misGastos — registro
 
+## 14-11-2026 — estándar visual
+
+- Tipografía por función y radios unificados; documentación en `docs/estandar-visual.md` y control con `node scripts/type-check.mjs`.
+
 ## 22-09-2026
 
 - Usuario autoriza nueva app misGastos, sin repostajes; prioridad importe/comercio/banco en Atajos.
@@ -123,3 +127,21 @@
 - Las filas de Entradas, Mis presupuestos y Patrimonio miden 88 px, con iconos de 44 px, textos más grandes y truncamiento. El donut usa las alturas declaradas en CSS y `scripts/home-height.mjs` las lee para comprobar 390 × 844 y 390 × 750. En 750 px el donut alcanza el mínimo y el contenido necesita desplazamiento vertical.
 - El editor de activos y la importación usan `DateField`; las hojas y modales limitan el desplazamiento horizontal. Se añadió una prueba de edición y guardado de la fecha de una Cuenta.
 - Falta confirmar el resultado visual y el desplazamiento vertical en el iPhone instalado.
+
+## Desglose de entradas — 2026-11-14
+
+- La tarjeta «Entradas del mes» abre una pantalla con el mismo total mensual, agrupado por origen o cuenta. Los orígenes se unifican sin distinguir acentos, mayúsculas ni espacios y usan las reglas de nombres de comercio.
+- Cada grupo muestra importe, número de entradas y proporción; se pueden desplegar sus movimientos para editarlos o eliminarlos. El estado vacío permite abrir un nuevo ingreso.
+
+## Correcciones de Entradas y escala móvil — 2026-11-14
+
+- Los orígenes se agrupan por el nombre resuelto por las reglas del usuario. Al editar, el tipo original del movimiento prevalece sobre `initialType`.
+- La tarjeta del inicio conserva el importe en su nombre accesible. Entradas muestra porcentaje textual, comparación con el mes anterior, estado vacío según el mes y paneles asociados a sus botones. El cambio de mes cierra el grupo abierto.
+- Se reutilizan los controles segmentados y el patrón de regreso existentes; las filas por origen muestran fecha y categoría en lugar de repetir el origen.
+- Se eliminó el zoom móvil global y se ajustaron los tamaños base y las zonas táctiles. El cálculo de portada da 12 px de aire a 390 × 844; a 390 × 750 requiere desplazamiento vertical.
+- Pasaron `npm run test:web` (111 pruebas), `npm run test:vercel` (10), compilación web, contraste, altura y detector Impeccable (0 hallazgos en código fuente).
+
+## Icono de inicio en iPhone — 2026-11-15
+
+- El monedero blanco sobre Violeta adulto sustituye la M en los iconos SVG y PNG de la app. El PNG de Apple tiene fondo cuadrado completo para que iOS aplique sus propias esquinas.
+- Para ver el icono nuevo en el iPhone, hay que borrar el acceso de la pantalla de inicio y volver a añadirlo desde Safari; iOS guarda el icono antiguo.
