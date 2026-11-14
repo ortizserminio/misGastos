@@ -1,5 +1,5 @@
 import {describe,it,expect} from 'vitest';
-import {incomeBreakdown} from './income';
+import {incomeBreakdown,incomeComparison} from './income';
 import {summary,type Transaction} from './domain';
 
 const item=(id:string,merchant:string,amountCents:number,extra:Partial<Transaction>={}):Transaction=>({id,type:'income',amountCents,merchant,bank:'N26',category:'Otros',date:'2026-11-10',source:'manual',...extra});
@@ -13,6 +13,10 @@ describe('incomeBreakdown',()=>{
   const result=incomeBreakdown([item('a','Acme SA',100),item('b','',100)],'2026-11','origin',[{match:'acme',name:'Empresa',category:'Otros'}]);
   expect(result.groups.map(g=>g.label)).toEqual(['Empresa','Sin indicar']);
  });
+ it('merges different origins resolved to the same custom name',()=>{
+  const rules=[{match:'acme',name:'Empresa',category:'Otros'},{match:'pago acme',name:'Empresa',category:'Otros'}];
+  expect(incomeBreakdown([item('a','Acme SA',100),item('b','Pago Acme',200)],'2026-11','origin',rules).groups).toMatchObject([{label:'Empresa',count:2,totalCents:300}]);
+ });
  it('returns no groups for a month without income',()=>{
   expect(incomeBreakdown([item('a','A',100)],'2026-10','origin')).toEqual({groups:[],totalCents:0});
  });
@@ -24,5 +28,18 @@ describe('incomeBreakdown',()=>{
  it('makes integer shares total 100',()=>{
   const result=incomeBreakdown([item('a','A',1),item('b','B',1),item('c','C',1)],'2026-11','origin');
   expect(result.groups.reduce((sum,g)=>sum+g.share,0)).toBe(100);
+ });
+});
+
+describe('incomeComparison',()=>{
+ it('shows increases, decreases and rounded equality',()=>{
+  const previous=item('p','A',10000,{date:'2026-10-10'});
+  expect(incomeComparison([previous,item('n','A',11200)],'2026-11')).toBe('+12 % que en octubre');
+  expect(incomeComparison([previous,item('n','A',9200)],'2026-11')).toBe('−8 % que en octubre');
+  expect(incomeComparison([previous,item('n','A',10040)],'2026-11')).toBe('Igual que en octubre');
+ });
+ it('handles an empty previous month and the January year boundary',()=>{
+  expect(incomeComparison([item('n','A',100)],'2026-11')).toBe('En octubre no entró dinero');
+  expect(incomeComparison([item('p','A',100,{date:'2025-12-10'}),item('n','A',120,{date:'2026-01-10'})],'2026-01')).toBe('+20 % que en diciembre');
  });
 });

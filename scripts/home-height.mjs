@@ -2,6 +2,7 @@ import {readFileSync} from 'node:fs';
 
 const css=readFileSync(new URL('../apps/web/src/home-compact.css',import.meta.url),'utf8');
 const base=readFileSync(new URL('../apps/web/src/styles.css',import.meta.url),'utf8');
+if(/html\s*\{\s*zoom\s*:/.test(base))throw new Error('El zoom global vuelve a reducir el móvil');
 const declaration=(source,pattern,name)=>{const match=source.match(pattern);if(!match)throw new Error(`Falta la medida CSS: ${name}`);return Number(match[1]);};
 const fixedExpression=css.match(/--home-fixed:calc\(([^)]+)\)/)?.[1];
 if(!fixedExpression)throw new Error('Falta --home-fixed');

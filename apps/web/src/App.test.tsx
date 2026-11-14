@@ -16,7 +16,7 @@ describe('personal finance workflow',()=>{
   ];
   localStorage.setItem('misgastos.local.v1',JSON.stringify({...emptyData(),transactions}));
   render(<App/>);
-  const card=screen.getByRole('button',{name:'Ver de dónde vienen tus entradas del mes'});
+  const card=screen.getByRole('button',{name:/ENTRADAS DEL MES.*ver de dónde vienen/i});
   expect(card.textContent).toContain('+191,34');
   fireEvent.click(card);
   expect(screen.getByRole('heading',{name:'Entradas'})).toBeTruthy();

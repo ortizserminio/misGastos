@@ -128,3 +128,11 @@
 
 - La tarjeta «Entradas del mes» abre una pantalla con el mismo total mensual, agrupado por origen o cuenta. Los orígenes se unifican sin distinguir acentos, mayúsculas ni espacios y usan las reglas de nombres de comercio.
 - Cada grupo muestra importe, número de entradas y proporción; se pueden desplegar sus movimientos para editarlos o eliminarlos. El estado vacío permite abrir un nuevo ingreso.
+
+## Correcciones de Entradas y escala móvil — 2026-11-14
+
+- Los orígenes se agrupan por el nombre resuelto por las reglas del usuario. Al editar, el tipo original del movimiento prevalece sobre `initialType`.
+- La tarjeta del inicio conserva el importe en su nombre accesible. Entradas muestra porcentaje textual, comparación con el mes anterior, estado vacío según el mes y paneles asociados a sus botones. El cambio de mes cierra el grupo abierto.
+- Se reutilizan los controles segmentados y el patrón de regreso existentes; las filas por origen muestran fecha y categoría en lugar de repetir el origen.
+- Se eliminó el zoom móvil global y se ajustaron los tamaños base y las zonas táctiles. El cálculo de portada da 12 px de aire a 390 × 844; a 390 × 750 requiere desplazamiento vertical.
+- Pasaron `npm run test:web` (111 pruebas), `npm run test:vercel` (10), compilación web, contraste, altura y detector Impeccable (0 hallazgos en código fuente).
