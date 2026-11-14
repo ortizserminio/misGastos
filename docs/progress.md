@@ -145,3 +145,11 @@
 
 - El monedero blanco sobre Violeta adulto sustituye la M en los iconos SVG y PNG de la app. El PNG de Apple tiene fondo cuadrado completo para que iOS aplique sus propias esquinas.
 - Para ver el icono nuevo en el iPhone, hay que borrar el acceso de la pantalla de inicio y volver a añadirlo desde Safari; iOS guarda el icono antiguo.
+
+## Chat con IA (gratuita) — 2026-11-15
+
+- La pestaña Chat responde con IA mediante `POST /api/chat` (`apps/web/api/chat.mjs`). El servidor valida la sesión de Supabase, carga `user_data` y deja que el modelo use cuatro herramientas de solo lectura (`_finance.mjs`): `resumen_periodo`, `buscar_movimientos`, `comparar_meses` y `saldos_cuentas`. Al modelo solo le llegan sus resultados y los nombres de categorías y cuentas; nunca el IBAN, las notas ni el perfil.
+- Proveedor: Google Gemini, nivel gratuito, por su API compatible con OpenAI (`_ai.mjs`). Se cambia sin tocar código con `AI_BASE_URL`, `AI_MODEL` y `AI_API_KEY` (o `GEMINI_API_KEY`). Modelo por defecto: `gemini-3.8-flash`. En el nivel gratuito, Google puede usar el contenido para mejorar sus productos; la pantalla lo avisa.
+- Límite de 30 preguntas por usuario y día (`chat_usage` y `bump_chat_usage` en `supabase/schema.sql`).
+- Sin clave configurada, el servidor responde 503 y la app muestra el asistente local por reglas de antes.
+- Activación (manual): 1) crear una clave gratuita en Google AI Studio; 2) añadir `GEMINI_API_KEY` en Vercel → Settings → Environment Variables (Production y Preview); 3) ejecutar en el SQL Editor de Supabase el bloque «Chat con IA» del final de `supabase/schema.sql`.
