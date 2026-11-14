@@ -32,17 +32,20 @@ export default function Chat({getToken,fallback,fetcher}:{getToken?:()=>Promise<
   finally{setBusy(false);}
  }
  return <div className="chat-page">
-  <div className="page-heading"><h1>Pregunta a tus números</h1><p className="chat-privacy">Responde una IA (Google Gemini, nivel gratuito) con los totales y movimientos que necesita para cada pregunta. Google puede usar ese contenido para mejorar sus productos. Nunca se envían tu IBAN ni tus notas.</p></div>
   <section className="card chat-card" aria-label="Conversación">
    {!messages.length&&<div className="chat-empty"><span className="assistant-icon"><MessageCircle size={32}/></span><h2>¿Qué quieres saber?</h2><div className="suggestions">{suggestions.map(s=><button key={s} type="button" onClick={()=>send(s)} disabled={busy}>{s}</button>)}</div></div>}
-   {messages.length>0&&<div className="chat-log" aria-live="polite">{messages.map((m,i)=><p key={i} className={`chat-bubble ${m.role}`}><span className="sr-only">{m.role==='user'?'Tú: ':'misGastos: '}</span>{m.content}</p>)}{busy&&<p className="chat-bubble assistant chat-thinking" role="status">Pensando…</p>}<div ref={end}/></div>}
+   {messages.length>0&&<div className="chat-log" aria-live="polite">{messages.map((m,i)=><p key={i} className={`chat-bubble ${m.role}`}><span className="sr-only">{m.role==='user'?'Tú: ':'misGastos: '}</span>{m.content}</p>)}{busy&&<p className="chat-bubble assistant chat-thinking" role="status">Pensando…</p>}</div>}
    {error&&<p className="error" role="alert">{error}</p>}
+   <div ref={end} className="chat-end"/>
+  </section>
+  {/* Fixed just above the bottom menu, like a messaging app. */}
+  <div className="chat-dock">
+   {(remaining!==null||messages.length>0)&&<div className="chat-footer">{remaining!==null&&<small>{remaining===1?'Te queda 1 pregunta hoy.':`Te quedan ${remaining} preguntas hoy.`}</small>}{messages.length>0&&<button type="button" className="text-button" onClick={()=>{setMessages([]);setError('');}} disabled={busy}><RotateCcw size={16}/> Nueva conversación</button>}</div>}
    <form className="chat-form" onSubmit={e=>{e.preventDefault();send(draft);}}>
     <label className="sr-only" htmlFor="chat-input">Tu pregunta</label>
     <textarea id="chat-input" rows={1} maxLength={2000} value={draft} placeholder="Escribe tu pregunta…" onChange={e=>setDraft(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send(draft);}}}/>
     <button type="submit" className="chat-send" aria-label="Enviar pregunta" disabled={busy||!draft.trim()}><ArrowUp size={20}/></button>
    </form>
-   <div className="chat-footer">{remaining!==null&&<small>{remaining===1?'Te queda 1 pregunta hoy.':`Te quedan ${remaining} preguntas hoy.`}</small>}{messages.length>0&&<button type="button" className="text-button" onClick={()=>{setMessages([]);setError('');}} disabled={busy}><RotateCcw size={16}/> Nueva conversación</button>}</div>
-  </section>
+  </div>
  </div>;
 }

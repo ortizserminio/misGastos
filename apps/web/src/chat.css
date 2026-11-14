@@ -1,18 +1,26 @@
-.chat-page{max-width:720px;margin:0 auto}
-.chat-privacy{font-size:var(--text-label);line-height:var(--leading-label);color:var(--color-muted)}
+/* Room at the bottom so the last message is not hidden behind the fixed input bar and the menu. */
+.chat-page{max-width:720px;margin:0 auto;padding-bottom:calc(200px + env(safe-area-inset-bottom))}
+.app-shell:has(.chat-page) .app-footer{display:none}
 .chat-card{display:flex;flex-direction:column;gap:var(--space-4);padding:var(--space-4)}
 .chat-empty{text-align:center;padding:var(--space-4) 0}
 .chat-empty h2{font-size:var(--text-title-s);line-height:var(--leading-title-s);font-weight:600;margin-bottom:var(--space-3)}
 .chat-empty .suggestions{margin:var(--space-4) 0 0}
-.chat-log{display:flex;flex-direction:column;gap:var(--space-2);max-height:55dvh;overflow-y:auto;padding:var(--space-1)}
+.chat-log{display:flex;flex-direction:column;gap:var(--space-2);padding:var(--space-1)}
 .chat-bubble{margin:0;max-width:88%;padding:var(--space-2) var(--space-3);border-radius:var(--radius-m);font-size:var(--text-body);line-height:var(--leading-body);white-space:pre-wrap;overflow-wrap:anywhere;color:var(--color-ink)}
 .chat-bubble.user{align-self:flex-end;background:var(--color-primary-soft)}
 .chat-bubble.assistant{align-self:flex-start;background:var(--color-surface-2)}
 .chat-thinking{color:var(--color-muted)}
+.chat-end{scroll-margin-bottom:calc(200px + env(safe-area-inset-bottom))}
+/* Desktop: the menu floats 22px above the bottom and is 69px tall (9 + 49 + 9 padding + 2 border). */
+.chat-dock{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(22px + 69px + var(--space-2));width:min(720px,100%);box-sizing:border-box;padding:var(--space-2) var(--space-4);display:flex;flex-direction:column;gap:var(--space-1);background:var(--color-bg);z-index:9}
 .chat-form{display:flex;align-items:flex-end;gap:var(--space-2)}
-.chat-form textarea{flex:1;min-width:0;min-height:48px;max-height:140px;resize:vertical;font:inherit;font-size:var(--text-input);line-height:var(--leading-input);padding:var(--space-3);border:1px solid var(--color-border-control);border-radius:var(--radius-s);background:var(--color-surface);color:var(--color-ink)}
+.chat-form textarea{flex:1;min-width:0;min-height:48px;max-height:140px;resize:none;font:inherit;font-size:var(--text-input);line-height:var(--leading-input);padding:var(--space-3);border:1px solid var(--color-border-control);border-radius:var(--radius-s);background:var(--color-surface);color:var(--color-ink)}
 .chat-send{display:grid;place-items:center;min-width:48px;min-height:48px;border-radius:var(--radius-s);background:var(--color-primary);color:var(--color-surface)}
 .chat-send:disabled{opacity:.42}
 .chat-footer{display:flex;align-items:center;justify-content:space-between;gap:var(--space-3);flex-wrap:wrap}
 .chat-footer small{font-size:var(--text-caption);line-height:var(--leading-caption);color:var(--color-muted)}
 .chat-unavailable{margin-bottom:var(--space-4)}
+/* Phone: the menu is full width at the very bottom: 1px border + 10px padding + 49px item + safe area. */
+@media (max-width:760px){
+ .chat-dock{bottom:calc(1px + 10px + 49px + max(12px,env(safe-area-inset-bottom)));width:100%;padding:var(--space-2) var(--space-4);border-top:1px solid var(--color-border);background:var(--color-surface-translucent);backdrop-filter:blur(18px)}
+}
