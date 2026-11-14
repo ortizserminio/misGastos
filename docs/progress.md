@@ -1,5 +1,9 @@
 # misGastos — registro
 
+## 14-11-2026 — estándar visual
+
+- Tipografía por función y radios unificados; documentación en `docs/estandar-visual.md` y control con `node scripts/type-check.mjs`.
+
 ## 22-09-2026
 
 - Usuario autoriza nueva app misGastos, sin repostajes; prioridad importe/comercio/banco en Atajos.
