@@ -17,8 +17,8 @@ export async function askChat(token:string,messages:ChatMessage[],fetcher:typeof
 // AI chat. Without a cloud session, or while the server has no AI key, the local rule-based assistant (fallback) is shown instead.
 export default function Chat({getToken,fallback,fetcher}:{getToken?:()=>Promise<string|null>;fallback:ReactNode;fetcher?:typeof fetch}){
  const [messages,setMessages]=useState<ChatMessage[]>([]),[draft,setDraft]=useState(''),[busy,setBusy]=useState(false),[error,setError]=useState(''),[remaining,setRemaining]=useState<number|null>(null),[unavailable,setUnavailable]=useState(false);
- const end=useRef<HTMLDivElement>(null);
- useEffect(()=>{end.current?.scrollIntoView?.({block:'end'});},[messages,busy]);
+ const log=useRef<HTMLDivElement>(null);
+ useEffect(()=>{if(log.current)log.current.scrollTop=log.current.scrollHeight;},[messages,busy]);
  if(!getToken||unavailable)return <>{unavailable&&<p className="notice chat-unavailable" role="status">El chat con IA aún no está activado. Mientras tanto, aquí tienes el asistente básico.</p>}{fallback}</>;
  async function send(text:string){
   const question=text.trim();if(!question||busy)return;
@@ -33,12 +33,11 @@ export default function Chat({getToken,fallback,fetcher}:{getToken?:()=>Promise<
  }
  return <div className="chat-page">
   <section className="card chat-card" aria-label="Conversación">
-   {!messages.length&&<div className="chat-empty"><span className="assistant-icon"><MessageCircle size={32}/></span><h2>¿Qué quieres saber?</h2><div className="suggestions">{suggestions.map(s=><button key={s} type="button" onClick={()=>send(s)} disabled={busy}>{s}</button>)}</div></div>}
-   {messages.length>0&&<div className="chat-log" aria-live="polite">{messages.map((m,i)=><p key={i} className={`chat-bubble ${m.role}`}><span className="sr-only">{m.role==='user'?'Tú: ':'misGastos: '}</span>{m.content}</p>)}{busy&&<p className="chat-bubble assistant chat-thinking" role="status">Pensando…</p>}</div>}
-   {error&&<p className="error" role="alert">{error}</p>}
-   <div ref={end} className="chat-end"/>
-  </section>
-  {/* Fixed just above the bottom menu, like a messaging app. */}
+   <div ref={log} className="chat-content">
+    {!messages.length&&<div className="chat-empty"><span className="assistant-icon"><MessageCircle size={32}/></span><h2>¿Qué quieres saber?</h2><div className="suggestions">{suggestions.map(s=><button key={s} type="button" onClick={()=>send(s)} disabled={busy}>{s}</button>)}</div></div>}
+    {messages.length>0&&<div className="chat-log" aria-live="polite">{messages.map((m,i)=><p key={i} className={`chat-bubble ${m.role}`}><span className="sr-only">{m.role==='user'?'Tú: ':'misGastos: '}</span>{m.content}</p>)}{busy&&<p className="chat-bubble assistant chat-thinking" role="status">Pensando…</p>}</div>}
+    {error&&<p className="error" role="alert">{error}</p>}
+   </div>
   <div className="chat-dock">
    {(remaining!==null||messages.length>0)&&<div className="chat-footer">{remaining!==null&&<small>{remaining===1?'Te queda 1 pregunta hoy.':`Te quedan ${remaining} preguntas hoy.`}</small>}{messages.length>0&&<button type="button" className="text-button" onClick={()=>{setMessages([]);setError('');}} disabled={busy}><RotateCcw size={16}/> Nueva conversación</button>}</div>}
    <form className="chat-form" onSubmit={e=>{e.preventDefault();send(draft);}}>
@@ -47,5 +46,6 @@ export default function Chat({getToken,fallback,fetcher}:{getToken?:()=>Promise<
     <button type="submit" className="chat-send" aria-label="Enviar pregunta" disabled={busy||!draft.trim()}><ArrowUp size={20}/></button>
    </form>
   </div>
+  </section>
  </div>;
 }
