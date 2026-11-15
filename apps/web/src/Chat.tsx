@@ -34,7 +34,7 @@ export default function Chat({getToken,fallback,fetcher}:{getToken?:()=>Promise<
  return <div className="chat-page">
   <section className="card chat-card" aria-label="Conversación">
    <div ref={log} className="chat-content">
-    {!messages.length&&<div className="chat-empty"><span className="assistant-icon"><MessageCircle size={32}/></span><h2>¿Qué quieres saber?</h2><div className="suggestions">{suggestions.map(s=><button key={s} type="button" onClick={()=>send(s)} disabled={busy}>{s}</button>)}</div></div>}
+    {!messages.length&&<div className="chat-empty"><span className="assistant-icon"><MessageCircle size={32}/></span><h2>¿Qué quieres saber?</h2><div className="suggestions">{suggestions.map(s=><button key={s} type="button" onClick={()=>send(s)} disabled={busy}>{s}</button>)}</div><small className="chat-privacy">Responde la IA gratuita de Google, que puede usar lo que le envías para mejorar sus productos.</small></div>}
     {messages.length>0&&<div className="chat-log" aria-live="polite">{messages.map((m,i)=><p key={i} className={`chat-bubble ${m.role}`}><span className="sr-only">{m.role==='user'?'Tú: ':'misGastos: '}</span>{m.content}</p>)}{busy&&<p className="chat-bubble assistant chat-thinking" role="status">Pensando…</p>}</div>}
     {error&&<p className="error" role="alert">{error}</p>}
    </div>

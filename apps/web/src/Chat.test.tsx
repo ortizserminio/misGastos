@@ -15,6 +15,7 @@ describe('Chat',()=>{
  it('sends the conversation with the session token and shows the answer',async()=>{
   const fetcher=vi.fn((..._args:Parameters<typeof fetch>)=>ok({reply:'Llevas **72,50 €** en gastos.',remaining:29}));
   render(<Chat getToken={async()=>'token-de-prueba'} fallback={<p>básico</p>} fetcher={fetcher as unknown as typeof fetch}/>);
+  expect(screen.getByText(/IA gratuita de Google/)).toBeTruthy(); // notice visible before the first question
   fireEvent.click(screen.getByRole('button',{name:'¿Cómo voy este mes?'}));
   expect(await screen.findByText('Llevas 72,50 € en gastos.')).toBeTruthy();
   expect(screen.getByText('Te quedan 29 preguntas hoy.')).toBeTruthy();
