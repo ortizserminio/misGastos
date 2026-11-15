@@ -7,17 +7,19 @@ export function aiConfig() {
   const key = process.env.AI_API_KEY || process.env.GEMINI_API_KEY;
   if (!key) throw new ApiError(503, 'ai_not_configured', 'El chat con IA no está configurado todavía.');
   const base = (process.env.AI_BASE_URL || GEMINI).replace(/\/$/, '');
-  const model = process.env.AI_MODEL || 'gemini-3.8-flash';
-  // Free-tier models get overloaded (503) or hit their own quota (429): fall back to a lighter free model.
-  const fallback = process.env.AI_FALLBACK_MODEL ?? (base === GEMINI ? 'gemini-3.5-flash-lite' : '');
+  // Flash-Lite answers simple questions in seconds; the bigger Flash is the fallback when it is busy or out of quota.
+  const model = process.env.AI_MODEL || 'gemini-3.5-flash-lite';
+  const fallback = process.env.AI_FALLBACK_MODEL ?? (base === GEMINI ? 'gemini-3.8-flash' : '');
   return { key, base, models: [...new Set([model, fallback].filter(Boolean))] };
 }
 
 const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
 const TIMEOUT = 25_000; // a hung free-tier call must not leave the user on "Pensando…" for minutes
+// Gemini 3 Flash thinks at "high" by default, far too slow for these questions. Lowest level each model accepts.
+const EFFORT = { 'gemini-3.5-flash-lite': 'minimal', 'gemini-3.8-flash': 'low' };
 async function call({ key, base }, model, messages, tools) {
   try {
-    return await fetch(`${base}/chat/completions`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` }, body: JSON.stringify({ model, messages, tools, tool_choice: 'auto' }), signal: AbortSignal.timeout(TIMEOUT) });
+    return await fetch(`${base}/chat/completions`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` }, body: JSON.stringify({ model, messages, tools, tool_choice: 'auto', reasoning_effort: EFFORT[model] }), signal: AbortSignal.timeout(TIMEOUT) });
   } catch (e) { return { ok: false, status: 0, timedOut: e?.name === 'TimeoutError', error: `${e?.name}: ${e?.cause?.code ?? e?.message}` }; }
 }
 

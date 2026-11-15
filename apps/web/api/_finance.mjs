@@ -75,9 +75,11 @@ export function runTool(name, rawArgs, data, today) {
   try { args = typeof rawArgs === 'string' && rawArgs.trim() ? JSON.parse(rawArgs) : (rawArgs && typeof rawArgs === 'object' ? rawArgs : {}); } catch { return { error: 'Argumentos no válidos (JSON).' }; }
   try { return fn(data, args ?? {}, today); } catch (e) { return { error: 'No se ha podido calcular.' }; }
 }
-// Context the model needs to call the tools well: names only, never amounts.
+// Context sent with every question: names for the tools, plus this month's and last month's summary
+// so the common questions ("¿cómo voy?", "¿en qué gasto más?", "compara con el mes pasado") need no tool round.
 export function context(data, today) {
   const cats = (Array.isArray(data?.categories) ? data.categories.map(c => clean(c?.name, 40)) : []).filter(Boolean);
   const accounts = [...new Set([...(Array.isArray(data?.assets) ? data.assets.map(a => clean(a?.name, 60)) : []), ...(Array.isArray(data?.accounts) ? data.accounts.map(a => clean(a, 60)) : [])])].filter(Boolean);
-  return `Hoy es ${today}. Categorías: ${cats.join(', ') || 'ninguna'}. Cuentas: ${accounts.join(', ') || 'ninguna'}.`;
+  const summary = { mes_actual: resumenPeriodo(data, {}, today), mes_anterior: resumenPeriodo(data, { desde: shiftMonth(today.slice(0, 7), -1) }, today) };
+  return `Hoy es ${today}. Categorías: ${cats.join(', ') || 'ninguna'}. Cuentas: ${accounts.join(', ') || 'ninguna'}.\nResumen ya calculado (importes en euros): ${JSON.stringify(summary)}`;
 }

@@ -67,6 +67,13 @@ test('runTool rejects unknown tools and bad JSON without throwing', () => {
   assert.match(context(data, today), /Hoy es 2026-11-15\. Categorías: Restauración, Alimentación\. Cuentas: N26\./);
 });
 
+test('context carries this and last month already summed, so simple questions need no tool round', () => {
+  const ctx = context(data, today), summary = JSON.parse(ctx.slice(ctx.indexOf('{')));
+  assert.equal(summary.mes_actual.gastos, 72.5); assert.equal(summary.mes_actual.desde, '2026-11-01');
+  assert.equal(summary.mes_anterior.gastos, 30); assert.equal(summary.mes_anterior.desde, '2026-10-01');
+  assert.ok(!ctx.includes('ES0000') && !ctx.includes('secreto'));
+});
+
 test('conversation validates roles, length and that the last turn is the user', () => {
   assert.equal(conversation({ messages: [{ role: 'user', content: ' hola ' }] })[0].content, 'hola');
   assert.throws(() => conversation({ messages: [] }));
@@ -102,7 +109,7 @@ test('chat runs the tool loop, sends tool results back and returns the answer', 
   assert.equal(res.statusCode, 200);
   assert.deepEqual(res.body, { reply: 'Has gastado **60,00 €** en Mercadona.', remaining: DAILY_LIMIT - 3 });
   const ai = calls.filter(c => c.url.startsWith(AI));
-  assert.equal(ai.length, 2); assert.equal(ai[0].body.model, 'modelo-demo'); assert.equal(ai[0].headers.Authorization, 'Bearer ai-key');
+  assert.equal(ai.length, 2); assert.equal(ai[0].body.model, 'modelo-demo'); assert.equal(ai[0].body.reasoning_effort, undefined); // only set for known Gemini models assert.equal(ai[0].headers.Authorization, 'Bearer ai-key');
   const second = ai[1].body.messages;
   assert.deepEqual(second.at(-2), toolCall); // assistant turn replayed unchanged, thought signature included
   assert.equal(second.at(-1).role, 'tool'); assert.equal(JSON.parse(second.at(-1).content).encontrados, 2);
