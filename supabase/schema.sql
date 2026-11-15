@@ -74,3 +74,26 @@ grant select on public.shortcut_tokens to service_role;
 grant select, insert on public.shortcut_events to service_role;
 grant select, insert, update on public.user_data to service_role;
 grant select, update on public.invite_codes to service_role;
+
+-- Chat con IA: contador de preguntas por usuario y día (límite diario contra sustos en la cuota gratuita).
+create table if not exists public.chat_usage (
+  user_id uuid not null references auth.users on delete cascade,
+  day date not null,
+  count integer not null default 0,
+  primary key (user_id, day)
+);
+alter table public.chat_usage enable row level security;
+-- Suma una pregunta de forma atómica. Devuelve el nuevo total, o -1 si ya se había llegado al límite.
+create or replace function public.bump_chat_usage(p_user uuid, p_day date, p_limit integer)
+returns integer language plpgsql security definer set search_path = public as $$
+declare result integer;
+begin
+  insert into public.chat_usage (user_id, day, count) values (p_user, p_day, 1)
+  on conflict (user_id, day) do update set count = public.chat_usage.count + 1
+  where public.chat_usage.count < p_limit
+  returning count into result;
+  return coalesce(result, -1);
+end $$;
+revoke all on function public.bump_chat_usage(uuid, date, integer) from public, anon, authenticated;
+grant execute on function public.bump_chat_usage(uuid, date, integer) to service_role;
+grant select, insert, update on public.chat_usage to service_role;
