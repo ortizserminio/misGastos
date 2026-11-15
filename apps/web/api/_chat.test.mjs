@@ -81,7 +81,7 @@ function mockFetch({ user = { id: 'u1' }, count = 1, aiReplies = [], authStatus 
   globalThis.fetch = async (url, options = {}) => {
     const body = options.body ? JSON.parse(options.body) : undefined;
     calls.push({ url, body, headers: options.headers });
-    if (url.startsWith(AI)) { const next = aiReplies.shift(); return new Response(JSON.stringify(next.body ?? { choices: [{ message: next }] }), { status: next.status ?? 200 }); }
+    if (url.startsWith(AI)) { const next = aiReplies.shift(); if (next.throw) throw next.throw; return new Response(JSON.stringify(next.body ?? { choices: [{ message: next }] }), { status: next.status ?? 200 }); }
     const path = url.replace(process.env.SUPABASE_URL + '/', '');
     if (path === 'auth/v1/user') return new Response(JSON.stringify(authStatus === 200 ? user : { msg: 'bad jwt' }), { status: authStatus });
     if (path === 'rest/v1/rpc/bump_chat_usage') return new Response(JSON.stringify(count), { status: 200 });
@@ -145,6 +145,15 @@ test('a busy free model (503) is retried once, then the fallback model answers',
   mockFetch({ aiReplies: [busy, busy, busy, busy] }); const res = response();
   await chat(request({ messages: [{ role: 'user', content: 'hola' }] }), res);
   assert.equal(res.statusCode, 503); assert.equal(res.body.error, 'ai_busy');
+  delete process.env.AI_FALLBACK_MODEL; process.env.AI_MODEL = 'modelo-demo';
+});
+
+test('a model that hangs is not retried: the fallback answers', async () => {
+  process.env.AI_API_KEY = 'ai-key'; process.env.AI_BASE_URL = AI; process.env.AI_MODEL = 'principal'; process.env.AI_FALLBACK_MODEL = 'ligero';
+  const hung = { throw: new DOMException('The operation was aborted due to timeout', 'TimeoutError') };
+  const calls = mockFetch({ aiReplies: [hung, { role: 'assistant', content: 'Desde el ligero.' }] });
+  assert.equal(await answer([{ role: 'user', content: 'hola' }], data, today), 'Desde el ligero.');
+  assert.deepEqual(calls.filter(c => c.url.startsWith(AI)).map(c => c.body.model), ['principal', 'ligero']);
   delete process.env.AI_FALLBACK_MODEL; process.env.AI_MODEL = 'modelo-demo';
 });
 

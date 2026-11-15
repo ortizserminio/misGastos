@@ -14,10 +14,11 @@ export function aiConfig() {
 }
 
 const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+const TIMEOUT = 25_000; // a hung free-tier call must not leave the user on "Pensando…" for minutes
 async function call({ key, base }, model, messages, tools) {
   try {
-    return await fetch(`${base}/chat/completions`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` }, body: JSON.stringify({ model, messages, tools, tool_choice: 'auto' }) });
-  } catch { return null; }
+    return await fetch(`${base}/chat/completions`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` }, body: JSON.stringify({ model, messages, tools, tool_choice: 'auto' }), signal: AbortSignal.timeout(TIMEOUT) });
+  } catch (e) { return { ok: false, status: 0, timedOut: e?.name === 'TimeoutError', error: `${e?.name}: ${e?.cause?.code ?? e?.message}` }; }
 }
 
 // One chat-completions call. `model` pins the model already used in this conversation turn, because
@@ -29,15 +30,16 @@ export async function complete({ messages, tools, model }) {
   for (const candidate of models) {
     for (let attempt = 0; attempt < 2; attempt++) {
       const response = await call(config, candidate, messages, tools);
-      if (response?.ok) {
+      if (response.ok) {
         const body = await response.json().catch(() => null);
         const message = body?.choices?.[0]?.message;
         if (!message) throw new ApiError(502, 'ai_error', 'La IA no devolvió ninguna respuesta.');
         return { message, model: candidate };
       }
-      last = response?.status ?? 0;
-      const detail = response ? await response.text().then(t => { try { return JSON.parse(t)?.error?.message ?? t; } catch { return t; } }).catch(() => '') : 'sin conexión';
+      last = response.status;
+      const detail = response.error ?? await response.text().then(t => { try { return JSON.parse(t)?.error?.message ?? t; } catch { return t; } }).catch(() => '');
       console.error(`chat: ${candidate} respondió HTTP ${last}: ${String(detail).replace(/\s+/g, ' ').slice(0, 200)}`);
+      if (response.timedOut) break; // retrying a model that just hung would double the wait: go to the next one
       if (last === 0 || last === 500 || last === 503) { if (attempt === 0) { await wait(800); continue; } break; }
       if (last === 404 || last === 429) break; // unknown model or its quota is spent: try the next one
       throw new ApiError(502, 'ai_error', `La IA respondió con un error (HTTP ${last}).`);
