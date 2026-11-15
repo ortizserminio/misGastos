@@ -155,6 +155,7 @@ describe('personal finance workflow',()=>{
   const shortcutItem={id:'ev1',type:'expense' as const,amountCents:250,merchant:'Café del atajo',bank:'N26',category:'Otros',date:today(),source:'shortcut' as const,externalId:'ev1'};
   const cloud={email:'ana@ejemplo.com',initial:emptyData(),save:vi.fn(),logout:vi.fn(),createToken:vi.fn(async()=>'token-personal-123456789012345'),hasToken:vi.fn(async()=>false),fetchShortcut:vi.fn(async()=>[shortcutItem])};
   render(<App cloud={cloud}/>);
+  expect(screen.queryByRole('button',{name:/Tu atajo de Apple Pay/})).toBeNull();
   expect(await screen.findByText('Café del atajo')).toBeTruthy();
   expect(cloud.save).toHaveBeenCalledTimes(1);
   expect(cloud.save.mock.calls[0][0].transactions[0].id).toBe('ev1');
@@ -162,6 +163,9 @@ describe('personal finance workflow',()=>{
   expect(screen.getByText('ana@ejemplo.com')).toBeTruthy();
   fireEvent.click(screen.getByRole('button',{name:/Atajo Apple Pay/}));
   expect(await screen.findByText('Sin configurar')).toBeTruthy();
+  fireEvent.click(within(document.querySelector('main')!).getByRole('button',{name:'Ajustes'}));
+  expect(screen.getByRole('button',{name:/Atajo Apple Pay/})).toBeTruthy();
+  fireEvent.click(screen.getByRole('button',{name:/Atajo Apple Pay/}));
   expect(screen.getByRole('button',{name:'Enviar prueba'}).hasAttribute('disabled')).toBe(true);
   fireEvent.click(screen.getByRole('button',{name:/Generar mi token/}));
   expect(await screen.findByDisplayValue('token-personal-123456789012345')).toBeTruthy();
