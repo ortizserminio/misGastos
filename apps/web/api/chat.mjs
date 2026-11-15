@@ -2,7 +2,7 @@
 // The client sends its Supabase access token and the conversation (text only). The server loads the
 // user's data, lets the model call read-only tools over it and returns the final answer.
 import { json, ApiError, fail, supabase, sendError } from './_supabase.mjs';
-import { complete } from './_ai.mjs';
+import { complete, aiConfig } from './_ai.mjs';
 import { tools, runTool, context } from './_finance.mjs';
 
 export const DAILY_LIMIT = 30;
@@ -55,6 +55,10 @@ async function bump(userId, day) {
   return count;
 }
 
+// A failed answer gives the question back. Only if the count is still ours: if another request bumped it
+// meanwhile, nothing is returned (the user loses one question rather than going over the limit).
+const refund = (userId, day, used) => supabase(`rest/v1/chat_usage?user_id=eq.${encodeURIComponent(userId)}&day=eq.${day}&count=eq.${used}`, { method: 'PATCH', body: JSON.stringify({ count: used - 1 }) });
+
 export async function answer(history, data, today) {
   const messages = [{ role: 'system', content: `${SYSTEM}\n\n${context(data, today)}` }, ...history];
   let model;
@@ -76,10 +80,14 @@ export default async function handler(req, res) {
     const history = conversation(req.body);
     const userId = await userFor(req);
     const today = madridDate();
+    aiConfig(); // without an AI key, fail before counting the question
     const used = await bump(userId, today);
-    const rows = await supabase(`rest/v1/user_data?user_id=eq.${encodeURIComponent(userId)}&select=data`);
-    const data = rows?.[0]?.data ?? { transactions: [], assets: [], categories: [], accounts: [] };
-    const reply = await answer(history, data, today);
+    let reply;
+    try {
+      const rows = await supabase(`rest/v1/user_data?user_id=eq.${encodeURIComponent(userId)}&select=data`);
+      const data = rows?.[0]?.data ?? { transactions: [], assets: [], categories: [], accounts: [] };
+      reply = await answer(history, data, today);
+    } catch (error) { await refund(userId, today, used).catch(() => {}); throw error; }
     return json(res, 200, { reply, remaining: Math.max(DAILY_LIMIT - used, 0) });
   } catch (error) { return sendError(res, error); }
 }

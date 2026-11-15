@@ -91,6 +91,7 @@ function mockFetch({ user = { id: 'u1' }, count = 1, aiReplies = [], authStatus 
     if (url.startsWith(AI)) { const next = aiReplies.shift(); if (next.throw) throw next.throw; return new Response(JSON.stringify(next.body ?? { choices: [{ message: next }] }), { status: next.status ?? 200 }); }
     const path = url.replace(process.env.SUPABASE_URL + '/', '');
     if (path === 'auth/v1/user') return new Response(JSON.stringify(authStatus === 200 ? user : { msg: 'bad jwt' }), { status: authStatus });
+    if (path.startsWith('rest/v1/chat_usage?')) return new Response(null, { status: 204 });
     if (path === 'rest/v1/rpc/bump_chat_usage') return new Response(JSON.stringify(count), { status: 200 });
     if (path.startsWith('rest/v1/user_data')) return new Response(JSON.stringify([{ data }]), { status: 200 });
     return new Response('{}', { status: 404 });
@@ -131,13 +132,20 @@ test('chat answers 401 without a valid session and 429 after the daily limit', a
 
 test('chat reports 503 when no AI key is configured and maps provider 429', async () => {
   delete process.env.AI_API_KEY; delete process.env.GEMINI_API_KEY;
-  mockFetch(); let res = response();
+  let calls = mockFetch(); let res = response();
   await chat(request({ messages: [{ role: 'user', content: 'hola' }] }), res);
   assert.equal(res.statusCode, 503); assert.equal(res.body.error, 'ai_not_configured');
+  assert.ok(!calls.some(c => c.url.includes('bump_chat_usage'))); // not configured: the question is not counted
   process.env.AI_API_KEY = 'ai-key'; process.env.AI_BASE_URL = AI;
-  mockFetch({ aiReplies: [{ status: 429, body: { error: 'quota' } }] }); res = response();
+  calls = mockFetch({ count: 5, aiReplies: [{ status: 429, body: { error: 'quota' } }] }); res = response();
   await chat(request({ messages: [{ role: 'user', content: 'hola' }] }), res);
   assert.equal(res.statusCode, 429); assert.equal(res.body.error, 'ai_rate_limited');
+  const refund = calls.find(c => c.url.includes('rest/v1/chat_usage?'));
+  assert.match(refund.url, /user_id=eq\.u1&day=eq\.\d{4}-\d{2}-\d{2}&count=eq\.5$/); assert.deepEqual(refund.body, { count: 4 }); // failed answer: question given back
+});
+
+test('a period with only an end month covers that whole month', () => {
+  assert.deepEqual(range({ hasta: '2026-10' }, today), { start: '2026-10-01', end: '2026-10-31' });
 });
 
 test('a busy free model (503) is retried once, then the fallback model answers', async () => {

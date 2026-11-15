@@ -12,7 +12,8 @@ const monthEnd = month => { const [y, m] = month.split('-').map(Number); return 
 
 // Accepts {desde, hasta} as YYYY-MM-DD or YYYY-MM; defaults to the current month of `today`.
 export function range(args = {}, today) {
-  const start = isMonth(args.desde) ? `${args.desde}-01` : isDate(args.desde) ? args.desde : `${today.slice(0, 7)}-01`;
+  // Without "desde", the period starts at the first of the month of "hasta" (or of today).
+  const start = isMonth(args.desde) ? `${args.desde}-01` : isDate(args.desde) ? args.desde : `${(isMonth(args.hasta) || isDate(args.hasta) ? args.hasta : today).slice(0, 7)}-01`;
   const end = isMonth(args.hasta) ? monthEnd(args.hasta) : isDate(args.hasta) ? args.hasta : monthEnd(start.slice(0, 7));
   return start <= end ? { start, end } : { start: end, end: start };
 }
