@@ -1,4 +1,4 @@
-.budget-page{width:100%;min-height:100dvh;padding-bottom:100px}
+.budget-page{width:100%;min-height:calc(100dvh / var(--zoom));padding-bottom:100px}
 .budget-header{position:relative;display:flex;align-items:center;justify-content:center;min-height:60px;margin:20px 0 36px}
 .budget-header h1{font-size:var(--text-title-l);line-height:1.2;letter-spacing:-0.01em;margin:0;text-align:center}
 .budget-back{position:absolute;left:0;top:50%;transform:translateY(-50%);width:48px;height:48px;display:grid;place-items:center;border-radius:50%;color:var(--color-ink)}

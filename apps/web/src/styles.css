@@ -21,7 +21,7 @@ html,body{touch-action:pan-x pan-y}
 .home-month-selector{justify-content:flex-end}.home-month-selector .month-selector{margin-top:0}
 /* Phone: everything about 12% smaller, keeping the design's proportions. */
 /* With zoom, 100vh/100dvh shrink too: full-height screens compensate so they still reach the bottom edge. */
-@media (max-width:760px){html .login-page,html .cloud-center{min-height:100vh}html .budget-page{min-height:100dvh}html .modal.transaction-modal{height:auto}}
+@media (max-width:760px){html .login-page,html .cloud-center{min-height:calc(100vh / var(--zoom))}html .budget-page{min-height:calc(100dvh / var(--zoom))}html .modal.transaction-modal{height:auto}}
 
 /* Escala tipográfica e importes */
 :root{font-size:var(--text-body)}h1{font-size:var(--text-title-l);font-weight:600}h2{font-size:var(--text-title-s);font-weight:600}h3{font-size:var(--text-title-s);font-weight:600}input:not([type=file]):not([type=checkbox]):not([type=radio]),select,textarea{font-size:var(--text-input)}input[type=file]{font-size:var(--text-input)}[class*="amount"],[class*="balance"],.big-number,.pat-total>strong,.donut-hole strong,.income,.budget-pair strong,.budget-tile-bottom strong{font-family:var(--font-num);font-variant-numeric:tabular-nums;letter-spacing:-0.01em}.movement .amount,.wallet-card-balance{text-align:right}
@@ -49,3 +49,5 @@ h2,h3,.section-title h2,.feature-card strong{line-height:var(--leading-title-s)}
 label,.eyebrow,.small-pill,.status,.set-badge,.import-chip,.budget-tile small,.pat-total p{font-weight:500;letter-spacing:0}
 .pat-total>strong,.income-summary strong,.income-card h2,.pat-stats strong,.pat-change strong,.pat-card-value,.big-number,.budget-tile-bottom strong,.budget-pair strong,.wallet-card-balance,.account-choice em{font-family:var(--font-num);font-variant-numeric:tabular-nums;letter-spacing:-0.01em;font-weight:600}
 .pat-stats span{font-size:var(--text-label);line-height:var(--leading-label)}
+/* Toda la interfaz un 10% más pequeña. Lo que ocupa toda la pantalla (100vh/100dvh) se divide entre --zoom para seguir llenándola. */
+:root{--zoom:.9}html{zoom:var(--zoom)}

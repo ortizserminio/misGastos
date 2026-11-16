@@ -1,5 +1,5 @@
 .chat-page{flex:1;min-height:0;max-width:720px;margin:0 auto;width:100%;display:flex;flex-direction:column}
-.app-shell:has(.chat-page){display:flex;flex-direction:column;height:100vh;height:100dvh;overflow:hidden;padding-top:var(--space-4);padding-bottom:calc(22px + 69px + var(--space-2))}
+.app-shell:has(.chat-page){display:flex;flex-direction:column;height:calc(100vh / var(--zoom));height:calc(100dvh / var(--zoom));overflow:hidden;padding-top:var(--space-4);padding-bottom:calc(22px + 69px + var(--space-2))}
 .app-shell:has(.chat-page) main{flex:1;min-height:0;display:flex;flex-direction:column}
 .app-shell:has(.chat-page) .app-footer{display:none}
 .chat-card{flex:1;min-height:0;display:flex;flex-direction:column;padding:0;margin:0;overflow:hidden}
