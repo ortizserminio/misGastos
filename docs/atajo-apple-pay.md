@@ -59,3 +59,7 @@ La idempotencia protege reintentos del mismo evento. Dos automatizaciones indepe
 Primero probar receptor, banco y duplicados con el simulador local y datos sintéticos. Después elegir alojamiento HTTPS y configurar autenticación, aislamiento de datos, límites y copias. Finalmente comprobar manualmente Atajos en el iPhone: valores disponibles, red, respuesta de error, reintento y ejecución bloqueada. La última prueba depende del dispositivo y no está sustituida por pruebas de escritorio.
 
 Referencias: [Apple: disparadores de transacciones](https://support.apple.com/en-bh/guide/shortcuts/apd65c67538a/ios), [Apple: peticiones API desde Atajos](https://support.apple.com/en-lamr/guide/shortcuts/apd58d46713f/ios), [Apple: App Intents](https://developer.apple.com/documentation/appintents).
+.
+.
+.
+.
