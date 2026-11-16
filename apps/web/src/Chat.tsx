@@ -35,7 +35,7 @@ export default function Chat({getToken,fallback,fetcher}:{getToken?:()=>Promise<
   {messages.length>0&&<div className="chat-top"><button type="button" className="chat-new" aria-label="Nueva conversación" onClick={()=>{setMessages([]);setError('');}} disabled={busy}><SquarePen size={20}/></button></div>}
   <div ref={log} className="chat-content" aria-label="Conversación">
    {!messages.length&&<div className="chat-empty"><span className="chat-mark"><MessageCircle size={28}/></span><h2>¿Qué quieres saber?</h2><div className="chat-suggestions">{suggestions.map(s=><button key={s} type="button" onClick={()=>send(s)} disabled={busy}>{s}</button>)}</div></div>}
-   {messages.length>0&&<div className="chat-log" aria-live="polite">{messages.map((m,i)=><p key={i} className={`chat-bubble ${m.role}`}><span className="sr-only">{m.role==='user'?'Tú: ':'misGastos: '}</span>{m.content}</p>)}{busy&&<p className="chat-bubble assistant chat-thinking" role="status">Pensando…</p>}</div>}
+   {messages.length>0&&<div className="chat-log" aria-live="polite">{messages.map((m,i)=><p key={i} className={`chat-bubble ${m.role==="user"?"chat-mine":"chat-reply"}`}><span className="sr-only">{m.role==='user'?'Tú: ':'misGastos: '}</span>{m.content}</p>)}{busy&&<p className="chat-bubble chat-reply chat-thinking" role="status">Pensando…</p>}</div>}
    {error&&<p className="error" role="alert">{error}</p>}
   </div>
   {/* Collapsed pill; while focused or with text it opens into a taller box, like the iOS Claude app. */}

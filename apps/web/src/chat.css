@@ -10,10 +10,11 @@
 .chat-empty h2{margin:0;font-size:var(--text-title-m);line-height:var(--leading-title-m);font-weight:500;letter-spacing:-0.01em;color:var(--color-ink)}
 .chat-suggestions{display:flex;flex-wrap:wrap;justify-content:center;gap:var(--space-2);max-width:420px}
 .chat-suggestions button{min-height:36px;padding:var(--space-2) var(--space-3);border-radius:999px;border:1px solid var(--color-border);background:var(--color-surface);color:var(--color-ink-2);font-size:var(--text-label);line-height:var(--leading-label)}
-.chat-log{text-align:left;display:flex;flex-direction:column;gap:var(--space-4)}
-.chat-bubble{margin:0;font-size:var(--text-body);line-height:var(--leading-body);white-space:pre-wrap;overflow-wrap:anywhere;color:var(--color-ink)}
-.chat-bubble.user{align-self:flex-end;max-width:85%;padding:var(--space-2) var(--space-4);border-radius:20px;background:var(--color-primary-soft)}
-.chat-bubble.assistant{align-self:flex-start;max-width:100%;padding:0 var(--space-1)}
+.chat-log{display:flex;flex-direction:column;gap:var(--space-3)}
+/* Messaging style: replies on the left, your questions on the right, like a phone chat. */
+.chat-bubble{margin:0;max-width:85%;padding:var(--space-2) var(--space-3);border-radius:16px;text-align:left;font-size:var(--text-body);line-height:var(--leading-body);white-space:pre-wrap;overflow-wrap:anywhere;color:var(--color-ink)}
+.chat-mine{align-self:flex-end;border-top-right-radius:4px;background:var(--color-primary-soft)}
+.chat-reply{align-self:flex-start;border-top-left-radius:4px;background:var(--color-surface);border:1px solid var(--color-border);box-shadow:0 1px 2px var(--color-shadow)}
 .chat-thinking{color:var(--color-muted)}
 .chat-form{flex-shrink:0;display:flex;flex-wrap:wrap;align-items:center;gap:var(--space-2);padding:6px 6px 6px 20px;border-radius:28px;border:1px solid var(--color-border);background:var(--color-surface);box-shadow:var(--shadow-card);transition:border-radius .2s,padding .2s}
 .chat-form:focus-within{border-color:var(--color-primary-light)}
