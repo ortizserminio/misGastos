@@ -1,4 +1,4 @@
-.modal.transaction-modal{position:fixed;inset:0;margin:0;width:100%;max-width:none;height:100dvh;max-height:none;padding:0;border:0;border-radius:0;background:var(--color-surface);overflow:hidden;box-sizing:border-box}
+.modal.transaction-modal{position:fixed;inset:0;margin:0;width:100%;max-width:none;height:calc(100dvh / var(--zoom));max-height:none;padding:0;border:0;border-radius:0;background:var(--color-surface);overflow:hidden;box-sizing:border-box}
 .transaction-modal .transaction-layout{display:flex;flex-direction:column;width:100%;max-width:540px;height:100%;min-height:0;margin:0 auto;padding:max(12px,env(safe-area-inset-top)) 20px max(12px,env(safe-area-inset-bottom));box-sizing:border-box}
 .transaction-modal .transaction-header,.transaction-modal .transaction-footer{flex-shrink:0}
 .transaction-modal .modal-body{flex:1;min-height:0;padding:22px 4px 12px;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain}
