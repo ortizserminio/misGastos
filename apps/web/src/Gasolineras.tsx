@@ -11,7 +11,8 @@ type Prefs={province:string;fuel:number;mode:'price'|'near'};
 function saved():Prefs{try{const v=JSON.parse(localStorage.getItem(KEY)??'{}');return {province:typeof v.province==='string'?v.province:'',fuel:Number.isInteger(v.fuel)&&v.fuel>=0&&v.fuel<FUELS.length?v.fuel:0,mode:v.mode==='near'?'near':'price'};}catch{return {province:'',fuel:0,mode:'price'};}}
 const euro=new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR'});
 const price=(n:number)=>n.toFixed(3).replace('.',',');
-const provinceLabel=(name:string)=>name.toLocaleLowerCase('es-ES').split(/(\s+)/).map((word,i)=>i>0&&/^(de|del|la|las|los|y)$/.test(word)?word:word.replace(/^\p{L}/u,c=>c.toLocaleUpperCase('es-ES'))).join('');
+// The API writes "CORUÑA (A)"; move the article to the front: "A Coruña".
+const provinceLabel=(name:string)=>name.replace(/^(.+?)\s*\((.+)\)$/,'$2 $1').toLocaleLowerCase('es-ES').split(/(\s+)/).map((word,i)=>i>0&&/^(de|del|la|las|los|y)$/.test(word)?word:word.replace(/^\p{L}/u,c=>c.toLocaleUpperCase('es-ES'))).join('');
 const maps=(s:Station)=>`https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lon}`;
 export default function Gasolineras({onBack}:{onBack:()=>void}){
  const [initial]=useState(saved),[province,setProvince]=useState(initial.province),[fuel,setFuel]=useState(initial.fuel),[mode,setMode]=useState<'price'|'near'>(initial.mode);
