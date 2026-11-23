@@ -6,6 +6,7 @@ const data={ListaEESSPrecio:[
  {IDEESS:'2','Rótulo':'CEPSA',Dirección:'Calle dos',Localidad:'BARCELONA',Latitud:'41,3874','Longitud (WGS84)':'2,1686','Precio Gasolina 95 E5':'1,410'},
  {IDEESS:'3','Rótulo':'SIN PRECIO',Dirección:'Calle tres',Localidad:'MADRID',Latitud:'40,5','Longitud (WGS84)':'-3,7','Precio Gasolina 95 E5':''},
  {IDEESS:'4','Rótulo':'SIN COORDENADAS',Dirección:'Calle cuatro',Localidad:'MADRID',Latitud:'x','Longitud (WGS84)':'-3,7','Precio Gasolina 95 E5':'1,200'},
+ {IDEESS:'5','Rótulo':'EN CERO',Dirección:'Calle cinco',Localidad:'VALDEMORO',Latitud:'0,000000','Longitud (WGS84)':'0,000000','Precio Gasolina 95 E5':'1,100'},
 ]};
 describe('fuel',()=>{
  const stations=parseStations(data,FUELS[0].field);

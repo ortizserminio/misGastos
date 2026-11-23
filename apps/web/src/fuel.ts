@@ -15,7 +15,7 @@ export function parseStations(json:unknown,field:string):Station[]{
  if(!Array.isArray(rows))return [];
  return rows.flatMap(row=>{
   const price=number(row[field]),lat=number(row['Latitud']),lon=number(row['Longitud (WGS84)']);
-  if(!Number.isFinite(price)||price<=0||!Number.isFinite(lat)||Math.abs(lat)>90||!Number.isFinite(lon)||Math.abs(lon)>180)return [];
+  if(!Number.isFinite(price)||price<=0||!(lat>=27&&lat<=44.5&&lon>=-18.5&&lon<=4.6))return []; // outside Spain (the API has stations at 0,0)
   return [{id:String(row.IDEESS??''),name:title(row['Rótulo']),address:String(row['Dirección']??''),town:title(row.Localidad),lat,lon,price}];
  });
 }
