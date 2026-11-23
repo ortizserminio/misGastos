@@ -26,7 +26,11 @@ export default function FuelMap({stations,here,onLocate}:Props){
   const renderPins=()=>{
    pins.clearLayers();
    const visible=stations.filter(s=>map.getBounds().contains([s.lat,s.lon])).sort((a,b)=>a.price-b.price).slice(0,25);
+   const painted:L.Point[]=[];
    for(const s of visible){
+    const point=map.latLngToContainerPoint([s.lat,s.lon]);
+    if(s.price!==cheapest&&painted.some(p=>Math.abs(p.x-point.x)<56&&Math.abs(p.y-point.y)<26))continue;
+    painted.push(point);
     const best=s.price===cheapest;
     const icon=L.divIcon({className:'fuel-pin-wrap',html:`<span class="fuel-pin${best?' fuel-pin-best':''}">${price(s.price)}${best?' €':''}</span>`,iconSize:[0,0]});
     L.marker([s.lat,s.lon],{icon,zIndexOffset:best?1000:0}).on('click',()=>setSelected(s)).addTo(pins);
