@@ -27,3 +27,9 @@ export function distanceKm(a:Point,b:Point){
 export function sortStations(list:Station[],mode:'price'|'near',here?:Point):Station[]{
  return [...list].sort((a,b)=>(mode==='near'&&here?distanceKm(a,here)-distanceKm(b,here):a.price-b.price)||a.name.localeCompare(b.name,'es'));
 }
+export function priceTier(price:number,prices:number[]):0|1|2{
+ if(!prices.length)return 0;
+ const sorted=[...prices].sort((a,b)=>a-b);
+ const rank=sorted.findIndex(value=>value>=price);
+ return Math.min(2,Math.floor((rank<0?sorted.length-1:rank)*3/sorted.length)) as 0|1|2;
+}

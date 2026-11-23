@@ -1,5 +1,5 @@
 import {describe,it,expect} from 'vitest';
-import {FUELS,parseStations,sortStations,distanceKm} from './fuel';
+import {FUELS,parseStations,sortStations,distanceKm,priceTier} from './fuel';
 
 const data={ListaEESSPrecio:[
  {IDEESS:'1','Rótulo':'REPSOL',Dirección:'Calle uno',Localidad:'MADRID',Latitud:'40,4168','Longitud (WGS84)':'-3,7038','Precio Gasolina 95 E5':'1,399'},
@@ -13,4 +13,6 @@ describe('fuel',()=>{
  it('sorts by price',()=>{expect(sortStations([...stations].reverse(),'price').map(s=>s.id)).toEqual(['1','2']);});
  it('sorts by distance',()=>{expect(sortStations(stations,'near',{lat:41.4,lon:2.17}).map(s=>s.id)).toEqual(['2','1']);});
  it('measures Madrid to Barcelona',()=>{expect(distanceKm(stations[0],stations[1])).toBeGreaterThan(495);expect(distanceKm(stations[0],stations[1])).toBeLessThan(515);});
+ it('assigns prices to sorted thirds regardless of input order',()=>{const prices=[6,1,4,2,5,3];expect(prices.map(p=>priceTier(p,prices))).toEqual([2,0,1,0,2,1]);});
+ it('handles empty and tied price lists',()=>{expect(priceTier(1,[])).toBe(0);expect(priceTier(1,[1,1,1])).toBe(0);});
 });
