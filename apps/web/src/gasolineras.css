@@ -10,6 +10,7 @@
 .gasolineras .fuel-chips{padding:2px 2px 2px;margin-bottom:10px}
 .gasolineras .fuel-chips button{min-height:36px;padding:6px 13px;font-size:var(--text-label)}
 .gasolineras .fuel-controls{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.fuel-default-note{margin:0 0 12px;color:var(--color-muted);font-size:var(--text-caption)}
 .gasolineras .fuel-controls select{flex:1;width:auto;height:40px;min-height:40px;padding:6px 12px;font-size:var(--text-body);font-weight:600}
 .gasolineras .fuel-mode{flex:none;margin:0}
 .gasolineras .fuel-view{padding:0}
