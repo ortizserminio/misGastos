@@ -1,0 +1,16 @@
+import {describe,it,expect} from 'vitest';
+import {FUELS,parseStations,sortStations,distanceKm} from './fuel';
+
+const data={ListaEESSPrecio:[
+ {IDEESS:'1','Rótulo':'REPSOL',Dirección:'Calle uno',Localidad:'MADRID',Latitud:'40,4168','Longitud (WGS84)':'-3,7038','Precio Gasolina 95 E5':'1,399'},
+ {IDEESS:'2','Rótulo':'CEPSA',Dirección:'Calle dos',Localidad:'BARCELONA',Latitud:'41,3874','Longitud (WGS84)':'2,1686','Precio Gasolina 95 E5':'1,410'},
+ {IDEESS:'3','Rótulo':'SIN PRECIO',Dirección:'Calle tres',Localidad:'MADRID',Latitud:'40,5','Longitud (WGS84)':'-3,7','Precio Gasolina 95 E5':''},
+ {IDEESS:'4','Rótulo':'SIN COORDENADAS',Dirección:'Calle cuatro',Localidad:'MADRID',Latitud:'x','Longitud (WGS84)':'-3,7','Precio Gasolina 95 E5':'1,200'},
+]};
+describe('fuel',()=>{
+ const stations=parseStations(data,FUELS[0].field);
+ it('parses decimal commas and readable names, excluding unavailable or invalid stations',()=>{expect(stations).toHaveLength(2);expect(stations[0]).toMatchObject({name:'Repsol',town:'Madrid',price:1.399,lat:40.4168});});
+ it('sorts by price',()=>{expect(sortStations([...stations].reverse(),'price').map(s=>s.id)).toEqual(['1','2']);});
+ it('sorts by distance',()=>{expect(sortStations(stations,'near',{lat:41.4,lon:2.17}).map(s=>s.id)).toEqual(['2','1']);});
+ it('measures Madrid to Barcelona',()=>{expect(distanceKm(stations[0],stations[1])).toBeGreaterThan(495);expect(distanceKm(stations[0],stations[1])).toBeLessThan(515);});
+});
