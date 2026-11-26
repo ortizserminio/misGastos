@@ -43,3 +43,5 @@ npm.cmd run build
 ```
 
 Consultar el registro para los resultados efectivamente ejecutados y los módulos que aún no forman parte de esta primera entrega. No introducir datos personales en fixtures, capturas de prueba o Git. `apps/api/data/`, compilaciones y dependencias están ignorados.
+
+xxxxxxxxxxx
